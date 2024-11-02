@@ -112,7 +112,7 @@ export const filterTracks = (
 	return tracks;
 };
 
-const getTracksFromPlaylists = async (playlists: Playlist[]): Promise<Track[]> => {
+export const getTracksFromPlaylists = async (playlists: Playlist[]): Promise<Track[]> => {
 	const tracks = await Promise.all(playlists.map((playlist) => getTracks(playlist.id)));
 	return tracks.flat();
 };
