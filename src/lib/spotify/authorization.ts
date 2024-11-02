@@ -13,6 +13,8 @@ const CONFIG = {
 	]
 };
 
+const LOCAL_STORAGE_PREFIX = 'synchronized_playlists';
+
 export const login = async (): Promise<void> => {
 	const code_verifier = generateRandomString(64);
 	toLocalStorage('code_verifier', code_verifier);
@@ -104,14 +106,14 @@ const toLocalStorage = (key: string, value: string) => {
 	if (!browser) {
 		return;
 	}
-	localStorage.setItem(key, value);
+	localStorage.setItem(LOCAL_STORAGE_PREFIX + key, value);
 };
 
 const fromLocalStorage = (key: string): string | null => {
 	if (!browser) {
 		return null;
 	}
-	return localStorage.getItem(key);
+	return localStorage.getItem(LOCAL_STORAGE_PREFIX + key);
 };
 
 const generateRandomString = (length: number) => {
