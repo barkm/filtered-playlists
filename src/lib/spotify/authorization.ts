@@ -1,8 +1,9 @@
 import { browser } from '$app/environment';
 import { base } from '$app/paths';
+import { PUBLIC_SPOTIFY_CLIENT_ID } from '$env/static/public';
 
 const CONFIG = {
-	client_id: '03eeb40145834b08bf90ab2233cbb70e',
+	client_id: PUBLIC_SPOTIFY_CLIENT_ID,
 	redirect_endpoint: base + '/callback',
 	scope: [
 		'user-read-currently-playing',
