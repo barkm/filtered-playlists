@@ -15,7 +15,7 @@
 
 	let { playlists, synchronized_playlists = $bindable() }: Props = $props();
 
-	let playlist_name = '';
+	let playlist_name = $state('');
 
 	let included_playlists: Playlist[] = $state([]);
 	let excluded_playlists: Playlist[] = $state([]);
