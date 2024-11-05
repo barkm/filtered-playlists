@@ -25,12 +25,12 @@ export const getUser = async (): Promise<User> => {
 	return await response.json();
 };
 
-export type Playlist = {
+export interface Playlist {
 	id: string;
 	name: string;
 	description: string;
 	cover_url?: string;
-};
+}
 
 export const getPlaylist = async (playlist_id: string): Promise<Playlist> => {
 	const access_token = await getAccessToken();
