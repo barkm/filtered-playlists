@@ -98,9 +98,9 @@ export const getAccessToken = async (): Promise<string | null> => {
 };
 
 export const logout = () => {
-	localStorage.removeItem('access_token');
-	localStorage.removeItem('expires_at');
-	localStorage.removeItem('refresh_token');
+	removeFromLocalStorage('access_token');
+	removeFromLocalStorage('expires_at');
+	removeFromLocalStorage('refresh_token');
 };
 
 const toLocalStorage = (key: string, value: string) => {
@@ -115,6 +115,13 @@ const fromLocalStorage = (key: string): string | null => {
 		return null;
 	}
 	return localStorage.getItem(LOCAL_STORAGE_PREFIX + key);
+};
+
+const removeFromLocalStorage = (key: string) => {
+	if (!browser) {
+		return;
+	}
+	localStorage.removeItem(LOCAL_STORAGE_PREFIX + key);
 };
 
 const generateRandomString = (length: number) => {
