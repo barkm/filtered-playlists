@@ -105,7 +105,8 @@ export const filterTracks = (
 	excluded_tracks: Track[],
 	required_tracks: Track[]
 ): Track[] => {
-	let tracks = difference(included_tracks, excluded_tracks, (track) => track.uri);
+	let tracks = removeDuplicates(included_tracks, (track) => track.uri);
+	tracks = difference(tracks, excluded_tracks, (track) => track.uri);
 	if (required_tracks.length > 0) {
 		tracks = intersection(tracks, required_tracks, (track) => track.uri);
 	}
@@ -115,6 +116,14 @@ export const filterTracks = (
 export const getTracksFromPlaylists = async (playlists: Playlist[]): Promise<Track[]> => {
 	const tracks = await Promise.all(playlists.map((playlist) => getTracks(playlist.id)));
 	return tracks.flat();
+};
+
+const removeDuplicates = <T, S>(array: Array<T>, key: (x: T) => S): Array<T> => {
+	const seen = new Set<S>();
+	return array.filter((x) => {
+		const k = key(x);
+		return seen.has(k) ? false : seen.add(k);
+	});
 };
 
 const intersection = <T, S>(a: Array<T>, b: Array<T>, key: (x: T) => S): Array<T> => {
