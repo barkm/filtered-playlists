@@ -6,7 +6,7 @@ import {
 	addTracks,
 	createPlaylist,
 	getPlaylist,
-	getPlaylistCoverImageUrl,
+	getPlaylistCoverImage,
 	getPlaylists,
 	getTracks,
 	replaceTracks,
@@ -43,7 +43,15 @@ export const createSynchronizedPlaylist = async (
 	const black = generateSingleColorJpeg(20, 20, 'black');
 	const cover = writeJpegComment(black, JSON.stringify(definition));
 	const cover_base64 = removeDataUrlPrefix(cover);
-	await addPlaylistCoverImage(playlist.id, cover_base64);
+	let success = false;
+	while (!success) {
+		try {
+			await addPlaylistCoverImage(playlist.id, cover_base64);
+			success = true;
+		} catch (error) {
+			await new Promise((resolve) => setTimeout(resolve, 500));
+		}
+	}
 	const tracks = await getAndFilterTracks(synchronized_playlist);
 	addTracks(
 		playlist.id,
@@ -52,7 +60,11 @@ export const createSynchronizedPlaylist = async (
 	let cover_url = undefined;
 	let retries = 0;
 	while (cover_url === undefined && retries < 5) {
-		cover_url = await getPlaylistCoverImageUrl(playlist.id);
+		const cover = await getPlaylistCoverImage(playlist.id);
+		if (cover && cover?.height === null) {
+			cover_url = cover.url;
+			break;
+		}
 		await new Promise((resolve) => setTimeout(resolve, 500));
 		retries++;
 	}

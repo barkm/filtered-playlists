@@ -226,9 +226,15 @@ export const addPlaylistCoverImage = async (
 	}
 };
 
-export const getPlaylistCoverImageUrl = async (
+export interface CoverImage {
+	url: string;
+	width: number | null;
+	height: number | null;
+}
+
+export const getPlaylistCoverImage = async (
 	playlist_id: string
-): Promise<string | undefined> => {
+): Promise<CoverImage | undefined> => {
 	const access_token = await getAccessToken();
 	if (!access_token) {
 		throw new Error('No access token');
@@ -245,5 +251,10 @@ export const getPlaylistCoverImageUrl = async (
 	if (images.length == 0) {
 		return undefined;
 	}
-	return images[images.length - 1].url;
+	const image = images[images.length - 1];
+	return {
+		url: image.url,
+		width: image.width,
+		height: image.height
+	};
 };
