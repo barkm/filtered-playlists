@@ -6,5 +6,3 @@
 		handleCallback();
 	});
 </script>
-
-In callback

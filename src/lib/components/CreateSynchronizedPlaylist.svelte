@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { type Playlist } from '$lib/spotify/api';
-	import {
-		createSynchronizedPlaylist,
-		filterTracks,
-		getTracksFromPlaylists,
-		type SynchronizedPlaylist
-	} from '$lib/synchronized';
+	import { createSynchronizedPlaylist, type SynchronizedPlaylist } from '$lib/synchronized';
+	import { onMount } from 'svelte';
 	import PlaylistDropdown from './PlaylistDropdown.svelte';
 
 	interface Props {
@@ -21,48 +17,110 @@
 	let excluded_playlists: Playlist[] = $state([]);
 	let required_playlists: Playlist[] = $state([]);
 
-	let included_tracks = $derived(getTracksFromPlaylists(included_playlists));
-	let excluded_tracks = $derived(getTracksFromPlaylists(excluded_playlists));
-	let required_tracks = $derived(getTracksFromPlaylists(required_playlists));
+	let placeholder = $state('');
+	const text = 'new playlist name';
+	let index = 0;
 
-	let tracks = $derived.by(async () => {
-		const [included, excluded, required] = await Promise.all([
-			included_tracks,
-			excluded_tracks,
-			required_tracks
-		]);
-		if (included.length === 0) {
-			return null;
+	function type() {
+		if (index < text.length) {
+			placeholder += text[index];
+			index++;
+			setTimeout(type, Math.floor(Math.random() * 10 + 100));
+		} else {
+			setTimeout(reset, 2000);
 		}
-		return filterTracks(included, excluded, required);
+	}
+
+	function reset() {
+		placeholder = '';
+		index = 0;
+		setTimeout(type, 1000);
+	}
+
+	onMount(() => {
+		type();
 	});
 </script>
 
-<input type="text" bind:value={playlist_name} />
-<button
-	onclick={async () => {
-		const synchronized_playlist = await createSynchronizedPlaylist(
-			playlist_name,
-			included_playlists,
-			excluded_playlists,
-			required_playlists
-		);
-		synchronized_playlists = [...synchronized_playlists, synchronized_playlist];
-	}}>Create</button
->
+<inputrow>
+	<div class="black-rectangle"></div>
+	<input type="text" bind:value={playlist_name} {placeholder} />
+	<button
+		disabled={playlist_name === '' || included_playlists.length === 0}
+		onclick={async () => {
+			const synchronized_playlist = await createSynchronizedPlaylist(
+				playlist_name,
+				included_playlists,
+				excluded_playlists,
+				required_playlists
+			);
+			synchronized_playlists = [...synchronized_playlists, synchronized_playlist];
+			playlist_name = '';
+			included_playlists = [];
+			excluded_playlists = [];
+			required_playlists = [];
+		}}>create</button
+	>
+</inputrow>
 
-<PlaylistDropdown {playlists} bind:selected_playlists={included_playlists} />
-<PlaylistDropdown {playlists} bind:selected_playlists={excluded_playlists} />
-<PlaylistDropdown {playlists} bind:selected_playlists={required_playlists} />
-{#await tracks}
-	<p>Loading tracks...</p>
-{:then tracks}
-	{#if tracks}
-		<h2>Included tracks</h2>
-		<ul>
-			{#each tracks as track}
-				<li>{track.name}</li>
-			{/each}
-		</ul>
-	{/if}
-{/await}
+{#if playlist_name !== ''}
+	<filters>
+		<PlaylistDropdown
+			placeholder="include"
+			{playlists}
+			bind:selected_playlists={included_playlists}
+		/>
+		<PlaylistDropdown
+			placeholder="exclude"
+			{playlists}
+			bind:selected_playlists={excluded_playlists}
+		/>
+		<PlaylistDropdown
+			placeholder="require"
+			{playlists}
+			bind:selected_playlists={required_playlists}
+		/>
+	</filters>
+{/if}
+
+<style>
+	inputrow {
+		height: 2.5em;
+		display: flex;
+		flex-direction: row;
+		margin-top: 1em;
+		padding: 0.5em;
+		max-width: 500px;
+		width: 100%;
+	}
+
+	.black-rectangle {
+		background-color: black;
+		height: 100%;
+		flex-basis: auto;
+		aspect-ratio: 1;
+		margin-right: 10px;
+	}
+
+	input {
+		align-self: center;
+		flex-grow: 1;
+		border: none;
+		border-bottom: 1px solid black;
+		outline: none;
+		padding-left: 1em;
+		padding-right: 1em;
+		font-size: 1em;
+	}
+
+	button {
+		margin-left: 1em;
+		align-self: center;
+		flex-basis: auto;
+	}
+
+	filters {
+		width: 75%;
+		max-width: 500px;
+	}
+</style>
