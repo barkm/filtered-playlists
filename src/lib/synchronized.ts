@@ -6,6 +6,7 @@ import {
 	addTracks,
 	createPlaylist,
 	getPlaylist,
+	getPlaylistCoverImageUrl,
 	getPlaylists,
 	getTracks,
 	replaceTracks,
@@ -48,6 +49,14 @@ export const createSynchronizedPlaylist = async (
 		playlist.id,
 		tracks.map((track) => track.uri)
 	);
+	let cover_url = undefined;
+	let retries = 0;
+	while (cover_url === undefined && retries < 5) {
+		cover_url = await getPlaylistCoverImageUrl(playlist.id);
+		await new Promise((resolve) => setTimeout(resolve, 500));
+		retries++;
+	}
+	playlist.cover_url = cover_url;
 	return {
 		playlist,
 		included_playlists,
