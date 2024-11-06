@@ -170,6 +170,25 @@ export const addTracks = async (playlist_id: string, track_uris: string[]): Prom
 	if (!access_token) {
 		throw new Error('No access token');
 	}
+	const track_uris_chunks = chunkArray(track_uris, 100);
+	for (const chunk of track_uris_chunks) {
+		await addTracksChunk(playlist_id, chunk);
+	}
+};
+
+const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
+	const result: T[][] = [];
+	for (let i = 0; i < array.length; i += chunkSize) {
+		result.push(array.slice(i, i + chunkSize));
+	}
+	return result;
+};
+
+const addTracksChunk = async (playlist_id: string, track_uris: string[]): Promise<void> => {
+	const access_token = await getAccessToken();
+	if (!access_token) {
+		throw new Error('No access token');
+	}
 	const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, {
 		method: 'POST',
 		headers: {
@@ -197,12 +216,13 @@ export const replaceTracks = async (playlist_id: string, track_uris: string[]): 
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-			uris: track_uris
+			uris: []
 		})
 	});
 	if (response.status != 201 && response.status != 200) {
 		throw new Error('Failed to replace tracks');
 	}
+	await addTracks(playlist_id, track_uris);
 };
 
 export const addPlaylistCoverImage = async (
