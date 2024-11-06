@@ -116,6 +116,22 @@ export const createPlaylist = async (name: string, description: string): Promise
 	};
 };
 
+export const unfollowPlaylist = async (playlist_id: string): Promise<void> => {
+	const access_token = await getAccessToken();
+	if (!access_token) {
+		throw new Error('No access token');
+	}
+	const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/followers`, {
+		method: 'DELETE',
+		headers: {
+			Authorization: `Bearer ${access_token}`
+		}
+	});
+	if (response.status != 200) {
+		throw new Error('Failed to unfollow playlist');
+	}
+};
+
 export interface Track {
 	uri: string;
 	name: string;
