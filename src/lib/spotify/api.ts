@@ -30,6 +30,7 @@ export interface Playlist {
 	name: string;
 	description: string;
 	cover_url?: string;
+	spotify_url: string;
 }
 
 export const getPlaylist = async (playlist_id: string): Promise<Playlist> => {
@@ -50,7 +51,8 @@ export const getPlaylist = async (playlist_id: string): Promise<Playlist> => {
 		id: body.id,
 		name: body.name,
 		description: body.description,
-		cover_url: body.images ? body.images[0].url : null
+		cover_url: body.images ? body.images[0].url : null,
+		spotify_url: body.external_urls.spotify
 	};
 };
 
@@ -76,7 +78,8 @@ export const getPlaylists = async (): Promise<Playlist[]> => {
 				id: item.id,
 				name: item.name,
 				description: item.description,
-				cover_url: item.images ? item.images[0].url : null
+				cover_url: item.images ? item.images[0].url : null,
+				spotify_url: item.external_urls.spotify
 			}))
 		);
 		url = body.next;
@@ -108,7 +111,8 @@ export const createPlaylist = async (name: string, description: string): Promise
 	return {
 		id: body.id,
 		name: body.name,
-		description: body.description
+		description: body.description,
+		spotify_url: body.external_urls.spotify
 	};
 };
 
@@ -204,4 +208,26 @@ export const addPlaylistCoverImage = async (
 	if (response.status != 202) {
 		throw new Error('Failed to add cover image');
 	}
+};
+
+export const getPlaylistCoverImageUrl = async (
+	playlist_id: string
+): Promise<string | undefined> => {
+	const access_token = await getAccessToken();
+	if (!access_token) {
+		throw new Error('No access token');
+	}
+	const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/images`, {
+		headers: {
+			Authorization: `Bearer ${access_token}`
+		}
+	});
+	if (response.status != 200) {
+		throw new Error('Failed to fetch cover image');
+	}
+	const images = await response.json();
+	if (images.length == 0) {
+		return undefined;
+	}
+	return images[images.length - 1].url;
 };
