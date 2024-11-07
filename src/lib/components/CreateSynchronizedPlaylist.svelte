@@ -88,12 +88,12 @@
 		flex-direction: row;
 		margin-top: 1em;
 		padding: 0.5em;
-		max-width: 500px;
-		width: 75%;
+		width: 100%;
 	}
 
 	cover {
-		margin-right: 1em;
+		margin-right: 0.5em;
+		height: 100%;
 	}
 
 	input {
@@ -105,6 +105,8 @@
 		padding-left: 1em;
 		padding-right: 1em;
 		font-size: 1em;
+		border-radius: 0;
+		min-width: 0;
 	}
 
 	button {
@@ -114,7 +116,6 @@
 	}
 
 	filters {
-		width: 75%;
-		max-width: 500px;
+		width: 100%;
 	}
 </style>

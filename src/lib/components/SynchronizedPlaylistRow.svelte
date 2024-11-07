@@ -70,7 +70,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		width: 75%;
+		width: 100%;
 		margin-left: 5px;
 		margin-right: 5px;
 	}
@@ -82,16 +82,19 @@
 		border: 1px solid black;
 		margin-top: 1em;
 		padding: 0.5em;
-		max-width: 500px;
 		width: 100%;
 	}
 
-	img {
-		margin-right: 0.5em;
+	a {
 		align-self: center;
 		height: 100%;
 		flex-basis: auto;
 		aspect-ratio: 1;
+	}
+
+	img {
+		align-self: center;
+		height: 100%;
 	}
 
 	.click {
@@ -109,6 +112,10 @@
 		text-align: left;
 		font-size: 1em;
 		color: black;
+		padding: 0.5em;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	playlistdetails {

@@ -52,7 +52,9 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		width: 100%;
+		width: 75%;
+		min-width: 300px;
+		max-width: 500px;
 		flex-grow: 1;
 	}
 
