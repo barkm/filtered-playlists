@@ -1,7 +1,8 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
+import { defineConfig, type UserConfig } from 'vite';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
-export default defineConfig({
+const user_config: UserConfig = {
 	plugins: [sveltekit()],
 	resolve: {
 		alias: {
@@ -12,4 +13,11 @@ export default defineConfig({
 	optimizeDeps: {
 		include: ['buffer']
 	}
-});
+};
+
+if (process.argv.includes('dev')) {
+	user_config.plugins!.push(basicSsl());
+	user_config.server = { proxy: {} };
+}
+
+export default defineConfig(user_config);
