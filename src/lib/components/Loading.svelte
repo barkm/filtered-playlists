@@ -1,5 +1,9 @@
+<script lang="ts">
+	import RandomSquare from './RandomSquare.svelte';
+</script>
+
 <container>
-	<blackrectangle></blackrectangle>
+	<RandomSquare update_ms={200} --width="30%" --max-width="300px" />
 </container>
 
 <style>
@@ -8,13 +12,6 @@
 		align-items: center;
 		justify-content: center;
 		width: 100%;
-		height: 100%;
-	}
-
-	blackrectangle {
-		background-color: black;
-		width: 30%;
-		max-width: 100px;
-		aspect-ratio: 1;
+		height: 100vh;
 	}
 </style>

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { type Playlist } from '$lib/spotify/api';
 	import { createSynchronizedPlaylist, type SynchronizedPlaylist } from '$lib/synchronized';
-	import { onMount } from 'svelte';
 	import PlaylistDropdown from './PlaylistDropdown.svelte';
+	import RandomSquare from './RandomSquare.svelte';
 
 	interface Props {
 		playlists: Playlist[];
@@ -36,14 +36,12 @@
 		index = 0;
 		setTimeout(type, 1000);
 	}
-
-	onMount(() => {
-		type();
-	});
 </script>
 
 <inputrow>
-	<div class="black-rectangle"></div>
+	<cover>
+		<RandomSquare update_ms={1000} --height="100%" />
+	</cover>
 	<input type="text" bind:value={playlist_name} {placeholder} />
 	<button
 		disabled={playlist_name === '' || included_playlists.length === 0}
@@ -91,15 +89,11 @@
 		margin-top: 1em;
 		padding: 0.5em;
 		max-width: 500px;
-		width: 100%;
+		width: 75%;
 	}
 
-	.black-rectangle {
-		background-color: black;
-		height: 100%;
-		flex-basis: auto;
-		aspect-ratio: 1;
-		margin-right: 10px;
+	cover {
+		margin-right: 1em;
 	}
 
 	input {
