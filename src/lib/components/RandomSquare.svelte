@@ -27,6 +27,6 @@
 	img {
 		width: var(--width);
 		height: var(--height);
-		max-width: var(--max-size);
+		max-width: var(--max-width);
 	}
 </style>
