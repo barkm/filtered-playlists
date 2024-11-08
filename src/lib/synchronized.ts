@@ -27,8 +27,7 @@ export const createSynchronizedPlaylist = async (
 	excluded_playlists: Playlist[],
 	required_playlists: Playlist[]
 ): Promise<SynchronizedPlaylist> => {
-	const description = '@synchronized';
-	const playlist = await createPlaylist(name, description);
+	const playlist = await createPlaylist(name, '');
 	const synchronized_playlist = {
 		playlist,
 		included_playlists,
@@ -85,11 +84,34 @@ export const createSynchronizedPlaylist = async (
 
 export const getSynchronizedPlaylists = async (): Promise<SynchronizedPlaylist[]> => {
 	const playlists = await getPlaylists();
-	return await Promise.all(playlists.filter(isSynchronizedPlaylist).map(toSynchronizedPlaylist));
+	const valid_playlists = await asyncFilter(playlists, isSynchronizedPlaylist);
+	return await Promise.all(valid_playlists.map(toSynchronizedPlaylist));
 };
 
-const isSynchronizedPlaylist = (playlist: Playlist): boolean => {
-	return playlist.description === '@synchronized' && playlist.cover_url !== null;
+const asyncFilter = async <T>(array: T[], filter: (x: T) => Promise<boolean>): Promise<T[]> => {
+	const filter_array = await Promise.all(array.map(filter));
+	return array.filter((_, i) => filter_array[i]);
+};
+
+const isSynchronizedPlaylist = async (playlist: Playlist): Promise<boolean> => {
+	try {
+		if (!playlist.cover || playlist.cover.width !== null || playlist.cover.height !== null) {
+			return false;
+		}
+		const data_url = await fetchImageData(playlist.cover.url);
+		const comment = readJpegComment(data_url);
+		const definition = JSON.parse(comment.toString());
+		if (
+			!Array.isArray(definition.included_playlist_ids) ||
+			!Array.isArray(definition.excluded_playlist_ids) ||
+			!Array.isArray(definition.required_playlist_ids)
+		) {
+			return false;
+		}
+	} catch (error) {
+		return false;
+	}
+	return true;
 };
 
 const toSynchronizedPlaylist = async (playlist: Playlist): Promise<SynchronizedPlaylist> => {
