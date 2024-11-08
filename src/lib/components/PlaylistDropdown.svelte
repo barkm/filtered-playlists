@@ -41,7 +41,7 @@
 	}}
 >
 	<playlistoption>
-		<img src={option.value.cover_url} alt="cover" width="20px" />
+		<img src={option.value.cover?.url} alt="cover" width="20px" />
 		<div>
 			{option.value.name}
 		</div>

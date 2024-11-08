@@ -29,7 +29,7 @@ export interface Playlist {
 	id: string;
 	name: string;
 	description: string;
-	cover_url?: string;
+	cover?: CoverImage;
 	spotify_url: string;
 }
 
@@ -47,11 +47,12 @@ export const getPlaylist = async (playlist_id: string): Promise<Playlist> => {
 		throw new Error('Failed to fetch playlist');
 	}
 	const body = await response.json();
+	const cover = body.images.length > 0 ? body.images[body.images.length - 1] : null;
 	return {
 		id: body.id,
 		name: body.name,
 		description: body.description,
-		cover_url: body.images ? body.images[0].url : null,
+		cover: cover,
 		spotify_url: body.external_urls.spotify
 	};
 };
@@ -73,15 +74,16 @@ export const getPlaylists = async (): Promise<Playlist[]> => {
 			throw new Error('Failed to fetch playlists');
 		}
 		const body = await response.json();
-		playlists = playlists.concat(
-			body.items.map((item: any) => ({
+		const new_playlists: Playlist[] = body.items.map(
+			(item: any): Playlist => ({
 				id: item.id,
 				name: item.name,
 				description: item.description,
-				cover_url: item.images ? item.images[0].url : null,
+				cover: item.images.length > 0 ? item.images[item.images.length - 1] : null,
 				spotify_url: item.external_urls.spotify
-			}))
+			})
 		);
+		playlists = playlists.concat(new_playlists);
 		url = body.next;
 	}
 	return playlists;

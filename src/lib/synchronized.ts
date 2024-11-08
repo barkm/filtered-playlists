@@ -68,7 +68,13 @@ export const createSynchronizedPlaylist = async (
 		await new Promise((resolve) => setTimeout(resolve, 500));
 		retries++;
 	}
-	playlist.cover_url = cover_url;
+	playlist.cover = cover_url
+		? {
+				url: cover_url,
+				width: null,
+				height: null
+			}
+		: undefined;
 	return {
 		playlist,
 		included_playlists,
@@ -87,10 +93,10 @@ const isSynchronizedPlaylist = (playlist: Playlist): boolean => {
 };
 
 const toSynchronizedPlaylist = async (playlist: Playlist): Promise<SynchronizedPlaylist> => {
-	if (!playlist.cover_url) {
-		throw new Error('Playlist has no cover URL');
+	if (!playlist.cover) {
+		throw new Error('Playlist has no cover');
 	}
-	const dataUrl = await fetchImageData(playlist.cover_url);
+	const dataUrl = await fetchImageData(playlist.cover.url);
 	const comment = readJpegComment(dataUrl);
 	const definition = JSON.parse(comment.toString());
 	const included_playlists = await Promise.all(definition.included_playlist_ids.map(getPlaylist));

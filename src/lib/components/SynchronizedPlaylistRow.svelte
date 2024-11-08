@@ -24,7 +24,7 @@
 <container>
 	<main>
 		<a href={synchronized_playlist.playlist.spotify_url} target="_blank">
-			<img src={synchronized_playlist.playlist.cover_url} alt="cover" />
+			<img src={synchronized_playlist.playlist.cover?.url} alt="cover" />
 		</a>
 		<button
 			class="playlistname"
