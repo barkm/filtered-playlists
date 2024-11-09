@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getPlaylists, type Playlist } from '$lib/spotify/api';
+	import { type Playlist } from '$lib/spotify/api';
 	import { onMount } from 'svelte';
 	import SynchronizedPlaylists from './ListSynchronizedPlaylists.svelte';
 	import CreateSynchronizedPlaylist from './CreateSynchronizedPlaylist.svelte';
@@ -9,12 +9,14 @@
 		type SynchronizedPlaylist
 	} from '$lib/synchronized';
 	import Loading from './Loading.svelte';
+	import { RequestCacher } from '$lib/spotify/cache';
 
 	let synchronized_playlists: SynchronizedPlaylist[] | null = $state(null);
 	let playlists: Playlist[] | null = $state(null);
 
 	onMount(async () => {
-		playlists = await getPlaylists();
+		const cached_request = new RequestCacher();
+		playlists = await cached_request.getPlaylists();
 		synchronized_playlists = await filterSychronizedPlaylists(playlists);
 	});
 

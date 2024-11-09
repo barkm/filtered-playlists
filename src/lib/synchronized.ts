@@ -4,14 +4,13 @@ import {
 	addPlaylistCoverImage,
 	addTracks,
 	createPlaylist,
-	getPlaylist,
 	getPlaylistCoverImage,
-	getPlaylists,
 	getTracks,
 	replaceTracks,
 	type Playlist,
 	type Track
 } from './spotify/api';
+import { RequestCacher } from './spotify/cache';
 
 export interface SynchronizedPlaylist {
 	playlist: Playlist;
@@ -86,7 +85,8 @@ export const filterSychronizedPlaylists = async (
 	playlists: Playlist[]
 ): Promise<SynchronizedPlaylist[]> => {
 	const valid_playlists = await asyncFilter(playlists, isSynchronizedPlaylist);
-	return await Promise.all(valid_playlists.map(toSynchronizedPlaylist));
+	const request_cacher = new RequestCacher();
+	return await Promise.all(valid_playlists.map((p) => toSynchronizedPlaylist(request_cacher, p)));
 };
 
 const asyncFilter = async <T>(array: T[], filter: (x: T) => Promise<boolean>): Promise<T[]> => {
@@ -115,16 +115,25 @@ const isSynchronizedPlaylist = async (playlist: Playlist): Promise<boolean> => {
 	return true;
 };
 
-const toSynchronizedPlaylist = async (playlist: Playlist): Promise<SynchronizedPlaylist> => {
+const toSynchronizedPlaylist = async (
+	cached_request: RequestCacher,
+	playlist: Playlist
+): Promise<SynchronizedPlaylist> => {
 	if (!playlist.cover) {
 		throw new Error('Playlist has no cover');
 	}
 	const dataUrl = await fetchImageData(playlist.cover.url);
 	const comment = readJpegComment(dataUrl);
 	const definition = JSON.parse(comment.toString());
-	const included_playlists = await Promise.all(definition.included_playlist_ids.map(getPlaylist));
-	const excluded_playlists = await Promise.all(definition.excluded_playlist_ids.map(getPlaylist));
-	const required_playlists = await Promise.all(definition.required_playlist_ids.map(getPlaylist));
+	const included_playlists = await Promise.all(
+		definition.included_playlist_ids.map(cached_request.getPlaylist)
+	);
+	const excluded_playlists = await Promise.all(
+		definition.excluded_playlist_ids.map(cached_request.getPlaylist)
+	);
+	const required_playlists = await Promise.all(
+		definition.required_playlist_ids.map(cached_request.getPlaylist)
+	);
 	return {
 		playlist,
 		included_playlists,

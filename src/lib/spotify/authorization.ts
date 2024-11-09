@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { base } from '$app/paths';
 import { PUBLIC_SPOTIFY_CLIENT_ID } from '$env/static/public';
+import type { MakeRequest } from './request';
 
 const CONFIG = {
 	client_id: PUBLIC_SPOTIFY_CLIENT_ID,
@@ -78,12 +79,13 @@ export const isLoggedIn = async (): Promise<boolean> => {
 	return (await getAccessToken()) !== null;
 };
 
-export const authorizedRequest = async (
+export const authorizedRequest: MakeRequest = async <T>(
 	url: string,
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+	handle_response: (response: Response) => Promise<T>,
 	content_type?: string,
 	body?: string
-): Promise<Response> => {
+): Promise<T> => {
 	const access_token = await getAccessToken();
 	if (!access_token) {
 		throw new Error('No access token');
@@ -99,7 +101,7 @@ export const authorizedRequest = async (
 		headers: headers,
 		body: body
 	});
-	return response;
+	return await handle_response(response);
 };
 
 const getAccessToken = async (): Promise<string | null> => {

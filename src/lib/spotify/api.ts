@@ -1,4 +1,5 @@
 import { authorizedRequest } from './authorization';
+import type { MakeRequest } from './request';
 
 export class NoAccessError extends Error {}
 
@@ -8,7 +9,10 @@ export interface User {
 }
 
 export const getUser = async (): Promise<User> => {
-	const response = await authorizedRequest('https://api.spotify.com/v1/me', 'GET');
+	return await authorizedRequest('https://api.spotify.com/v1/me', 'GET', handleGetUserResponse);
+};
+
+const handleGetUserResponse = async (response: Response): Promise<User> => {
 	if (response.status == 403) {
 		throw new NoAccessError();
 	}
@@ -26,48 +30,56 @@ export interface Playlist {
 	spotify_url: string;
 }
 
-export const getPlaylist = async (playlist_id: string): Promise<Playlist> => {
-	const response = await authorizedRequest(
+export const getPlaylist = async (
+	make_request: MakeRequest,
+	playlist_id: string
+): Promise<Playlist> => {
+	return await make_request(
 		`https://api.spotify.com/v1/playlists/${playlist_id}`,
-		'GET'
+		'GET',
+		handleGetPlaylistResponse
 	);
+};
+
+const handleGetPlaylistResponse = async (response: Response): Promise<Playlist> => {
 	if (response.status != 200) {
 		throw new Error('Failed to fetch playlist');
 	}
 	const body = await response.json();
-	const cover = body.images.length > 0 ? body.images[body.images.length - 1] : null;
-	return {
-		id: body.id,
-		name: body.name,
-		description: body.description,
-		cover: cover,
-		spotify_url: body.external_urls.spotify
-	};
+	return parsePlaylistFromItem(body);
 };
 
-export const getPlaylists = async (): Promise<Playlist[]> => {
+export const getPlaylists = async (make_request: MakeRequest): Promise<Playlist[]> => {
 	let playlists: Playlist[] = [];
-	let url = 'https://api.spotify.com/v1/me/playlists';
+	let url: string | null = 'https://api.spotify.com/v1/me/playlists';
 	while (url) {
-		const response = await authorizedRequest(url, 'GET');
-		if (response.status != 200) {
-			throw new Error('Failed to fetch playlists');
-		}
-		const body = await response.json();
-		const new_playlists: Playlist[] = body.items.map(
-			(item: any): Playlist => ({
-				id: item.id,
-				name: item.name,
-				description: item.description,
-				cover: item.images?.length > 0 ? item.images[item.images.length - 1] : null,
-				spotify_url: item.external_urls.spotify
-			})
-		);
-		playlists = playlists.concat(new_playlists);
-		url = body.next;
+		const response: PlaylistsResponse = await make_request(url, 'GET', handleGetPlaylistsResponse);
+		playlists = playlists.concat(response.playlists);
+		url = response.next;
 	}
 	return playlists;
 };
+
+interface PlaylistsResponse {
+	playlists: Playlist[];
+	next: string | null;
+}
+
+const handleGetPlaylistsResponse = async (response: Response): Promise<PlaylistsResponse> => {
+	if (response.status != 200) {
+		throw new Error('Failed to fetch playlists');
+	}
+	const body = await response.json();
+	return { playlists: body.items.map(parsePlaylistFromItem), next: body.next };
+};
+
+const parsePlaylistFromItem = (item: any): Playlist => ({
+	id: item.id,
+	name: item.name,
+	description: item.description,
+	cover: item.images?.length > 0 ? item.images[item.images.length - 1] : null,
+	spotify_url: item.external_urls.spotify
+});
 
 export const createPlaylist = async (
 	name: string,
@@ -75,9 +87,10 @@ export const createPlaylist = async (
 	description: string
 ): Promise<Playlist> => {
 	const user = await getUser();
-	const response = await authorizedRequest(
+	return await authorizedRequest(
 		`https://api.spotify.com/v1/users/${user.id}/playlists`,
 		'POST',
+		handleCreatePlaylistResponse,
 		'application/json',
 		JSON.stringify({
 			name: name,
@@ -85,24 +98,26 @@ export const createPlaylist = async (
 			description: description
 		})
 	);
+};
+
+const handleCreatePlaylistResponse = async (response: Response): Promise<Playlist> => {
 	if (response.status != 201) {
 		throw new Error('Failed to create playlist');
 	}
 	const body = await response.json();
-	return {
-		id: body.id,
-		name: body.name,
-		description: body.description,
-		spotify_url: body.external_urls.spotify
-	};
+	return parsePlaylistFromItem(body);
 };
 
 export const unfollowPlaylist = async (playlist_id: string): Promise<void> => {
-	const response = await authorizedRequest(
+	await authorizedRequest(
 		`https://api.spotify.com/v1/playlists/${playlist_id}/followers`,
 		'DELETE',
+		handleUnfollowPlaylistResponse,
 		'application/json'
 	);
+};
+
+const handleUnfollowPlaylistResponse = async (response: Response): Promise<void> => {
 	if (response.status != 200) {
 		throw new Error('Failed to unfollow playlist');
 	}
@@ -114,23 +129,40 @@ export interface Track {
 }
 
 export const getTracks = async (playlist_id: string): Promise<Track[]> => {
-	let url = `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`;
+	let url: string | null = `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`;
 	let tracks: Track[] = [];
 	while (url) {
-		const response = await authorizedRequest(url, 'GET');
-		if (response.status != 200) {
-			throw new Error('Failed to fetch tracks');
-		}
-		const body = await response.json();
-		url = body.next;
-		tracks = tracks.concat(
-			body.items.map((item: any) => ({
-				uri: item.track.uri,
-				name: item.track.name
-			}))
+		const response: GetTracksResponse = await authorizedRequest(
+			url,
+			'GET',
+			handleGetTracksResponse
 		);
+		url = response.next;
+		tracks = tracks.concat(response.tracks);
 	}
 	return tracks;
+};
+
+interface GetTracksResponse {
+	tracks: Track[];
+	next: string | null;
+}
+
+const handleGetTracksResponse = async (response: Response): Promise<GetTracksResponse> => {
+	if (response.status != 200) {
+		throw new Error('Failed to fetch tracks');
+	}
+	const body = await response.json();
+	const tracks: Track[] = body.items.map(
+		(item: any): Track => ({
+			uri: item.track.uri,
+			name: item.track.name
+		})
+	);
+	return {
+		tracks: tracks,
+		next: body.next
+	};
 };
 
 export const addTracks = async (playlist_id: string, track_uris: string[]): Promise<void> => {
@@ -152,41 +184,53 @@ const addTracksChunk = async (playlist_id: string, track_uris: string[]): Promis
 	const response = await authorizedRequest(
 		`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
 		'POST',
+		handleAddTracksChunkResponse,
 		'application/json',
 		JSON.stringify({
 			uris: track_uris
 		})
 	);
+};
+
+const handleAddTracksChunkResponse = async (response: Response): Promise<void> => {
 	if (response.status != 201) {
 		throw new Error('Failed to add tracks');
 	}
 };
 
 export const replaceTracks = async (playlist_id: string, track_uris: string[]): Promise<void> => {
-	const response = await authorizedRequest(
+	await authorizedRequest(
 		`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
 		'PUT',
+		handleReplaceTracksResponse,
 		'application/json',
 		JSON.stringify({
 			uris: []
 		})
 	);
+	await addTracks(playlist_id, track_uris);
+};
+
+const handleReplaceTracksResponse = async (response: Response): Promise<void> => {
 	if (response.status != 201 && response.status != 200) {
 		throw new Error('Failed to replace tracks');
 	}
-	await addTracks(playlist_id, track_uris);
 };
 
 export const addPlaylistCoverImage = async (
 	playlist_id: string,
 	image_data: string
 ): Promise<void> => {
-	const response = await authorizedRequest(
+	await authorizedRequest(
 		`https://api.spotify.com/v1/playlists/${playlist_id}/images`,
 		'PUT',
+		handAddPlaylistCoverImageResponse,
 		'image/jpeg',
 		image_data
 	);
+};
+
+const handAddPlaylistCoverImageResponse = async (response: Response): Promise<void> => {
 	if (response.status != 202) {
 		throw new Error('Failed to add cover image');
 	}
@@ -201,10 +245,16 @@ export interface CoverImage {
 export const getPlaylistCoverImage = async (
 	playlist_id: string
 ): Promise<CoverImage | undefined> => {
-	const response = await authorizedRequest(
+	return await authorizedRequest(
 		`https://api.spotify.com/v1/playlists/${playlist_id}/images`,
-		'GET'
+		'GET',
+		handleGetPlaylistCoverImageResponse
 	);
+};
+
+const handleGetPlaylistCoverImageResponse = async (
+	response: Response
+): Promise<CoverImage | undefined> => {
 	if (response.status != 200) {
 		throw new Error('Failed to fetch cover image');
 	}
