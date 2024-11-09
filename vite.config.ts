@@ -15,7 +15,7 @@ const user_config: UserConfig = {
 	}
 };
 
-if (process.argv.includes('dev')) {
+if (process.argv.includes('dev') || process.argv.includes('preview')) {
 	user_config.plugins!.push(basicSsl());
 	user_config.server = { proxy: {} };
 }
