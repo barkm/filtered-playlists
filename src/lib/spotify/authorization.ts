@@ -7,7 +7,7 @@ const CONFIG = {
 	redirect_endpoint: base + '/callback'
 };
 
-const LOCAL_STORAGE_PREFIX = 'synchronized_playlists';
+const LOCAL_STORAGE_PREFIX = 'synchronized_playlists:';
 
 export const login = async (scopes: string[]): Promise<void> => {
 	const code_verifier = generateRandomString(64);
