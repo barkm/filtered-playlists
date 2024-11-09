@@ -26,10 +26,6 @@ export class RequestCacher {
 		return response;
 	};
 
-	getPlaylists = async (): Promise<Playlist[]> => {
-		return await getPlaylists(this.makeRequest);
-	};
-
 	getPlaylist = async (playlist_id: string): Promise<Playlist> => {
 		return await getPlaylist(this.makeRequest, playlist_id);
 	};

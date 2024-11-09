@@ -49,11 +49,15 @@ const handleGetPlaylistResponse = async (response: Response): Promise<Playlist> 
 	return parsePlaylistFromItem(body);
 };
 
-export const getPlaylists = async (make_request: MakeRequest): Promise<Playlist[]> => {
+export const getPlaylists = async (): Promise<Playlist[]> => {
 	let playlists: Playlist[] = [];
 	let url: string | null = 'https://api.spotify.com/v1/me/playlists';
 	while (url) {
-		const response: PlaylistsResponse = await make_request(url, 'GET', handleGetPlaylistsResponse);
+		const response: PlaylistsResponse = await authorizedRequest(
+			url,
+			'GET',
+			handleGetPlaylistsResponse
+		);
 		playlists = playlists.concat(response.playlists);
 		url = response.next;
 	}
