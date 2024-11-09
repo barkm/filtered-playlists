@@ -29,7 +29,6 @@ export const login = async (scopes: string[]): Promise<void> => {
 };
 
 export const handleCallback = async () => {
-	console.log('Fetching access token');
 	let code_verifier = fromLocalStorage('code_verifier');
 	if (!code_verifier) {
 		throw new Error('No code verifier');
@@ -68,10 +67,6 @@ export const handleCallback = async () => {
 	}
 	const expires_at = Date.now() + 1000 * body.expires_in;
 	const scopes = scope.split(' ');
-
-	console.log('saving access tokens adn scopes');
-	console.log(access_token, expires_at, refresh_token, scopes);
-
 	toLocalStorage('access_token', access_token);
 	toLocalStorage('expires_at', expires_at.toString());
 	toLocalStorage('refresh_token', refresh_token);
@@ -83,15 +78,12 @@ export const getAccessToken = async (): Promise<string | null> => {
 	const access_token = fromLocalStorage('access_token');
 	const expires_at = fromLocalStorage('expires_at');
 	if (!access_token) {
-		console.log('No access token');
 		return null;
 	}
 	if (!expires_at) {
-		console.log('No expires at');
 		return null;
 	}
 	if (Date.now() > Number(expires_at)) {
-		console.log('Access token expired');
 		await refreshAccessToken();
 		return getAccessToken();
 	}
@@ -154,10 +146,7 @@ const base64Encode = (input: ArrayBuffer) => {
 };
 
 const refreshAccessToken = async () => {
-	console.log('refreshing acess token');
 	const refresh_token = fromLocalStorage('refresh_token') as string;
-	console.log(refresh_token);
-
 	const url = 'https://accounts.spotify.com/api/token';
 	const payload = {
 		method: 'POST',
