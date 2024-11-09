@@ -83,8 +83,9 @@ export const createSynchronizedPlaylist = async (
 	};
 };
 
-export const getSynchronizedPlaylists = async (): Promise<SynchronizedPlaylist[]> => {
-	const playlists = await getPlaylists();
+export const filterSychronizedPlaylists = async (
+	playlists: Playlist[]
+): Promise<SynchronizedPlaylist[]> => {
 	const valid_playlists = await asyncFilter(playlists, isSynchronizedPlaylist);
 	return await Promise.all(valid_playlists.map(toSynchronizedPlaylist));
 };

@@ -4,7 +4,7 @@
 	import SynchronizedPlaylists from './ListSynchronizedPlaylists.svelte';
 	import CreateSynchronizedPlaylist from './CreateSynchronizedPlaylist.svelte';
 	import {
-		getSynchronizedPlaylists,
+		filterSychronizedPlaylists,
 		synchronize,
 		type SynchronizedPlaylist
 	} from '$lib/synchronized';
@@ -14,8 +14,8 @@
 	let playlists: Playlist[] | null = $state(null);
 
 	onMount(async () => {
-		synchronized_playlists = await getSynchronizedPlaylists();
 		playlists = await getPlaylists();
+		synchronized_playlists = await filterSychronizedPlaylists(playlists);
 	});
 
 	const synchronize_all = async () => {
