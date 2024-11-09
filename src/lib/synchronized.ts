@@ -1,5 +1,4 @@
 import { readJpegComment, writeJpegComment, removeDataUrlPrefix } from './jpeg/comment';
-import { generateRandomJpegFromColors, PALETTE } from './jpeg/generate';
 import { fetchImageData } from './jpeg/download';
 import {
 	addPlaylistCoverImage,
@@ -22,6 +21,7 @@ export interface SynchronizedPlaylist {
 }
 
 export const createSynchronizedPlaylist = async (
+	cover_data: string,
 	name: string,
 	included_playlists: Playlist[],
 	excluded_playlists: Playlist[],
@@ -40,7 +40,6 @@ export const createSynchronizedPlaylist = async (
 		excluded_playlist_ids: excluded_playlists.map((playlist) => playlist.id),
 		required_playlist_ids: required_playlists.map((playlist) => playlist.id)
 	};
-	const cover_data = generateRandomJpegFromColors(3, 3, PALETTE);
 	const cover = writeJpegComment(cover_data, JSON.stringify(definition));
 	const cover_base64 = removeDataUrlPrefix(cover);
 	let success = false;

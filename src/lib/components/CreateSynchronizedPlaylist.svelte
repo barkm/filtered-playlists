@@ -24,6 +24,8 @@
 	let excluded_playlists: Playlist[] = $state([]);
 	let required_playlists: Playlist[] = $state([]);
 
+	let canvas: HTMLCanvasElement;
+
 	let placeholder = $state('');
 	const text = 'new playlist name';
 	let index = 0;
@@ -51,13 +53,14 @@
 
 <inputrow>
 	<cover>
-		<RandomSquare update_ms={1000} --height="100%" />
+		<RandomSquare update_ms={1000} --height="100%" bind:canvas />
 	</cover>
 	<input type="text" bind:value={playlist_name} {placeholder} />
 	<button
 		disabled={playlist_name === '' || included_playlists.length === 0}
 		onclick={async () => {
 			const synchronized_playlist = await createSynchronizedPlaylist(
+				canvas.toDataURL('image/jpeg'),
 				playlist_name,
 				included_playlists,
 				excluded_playlists,

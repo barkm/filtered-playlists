@@ -1,5 +1,3 @@
-import { createCanvas, Canvas } from 'canvas';
-
 export const BW_PALETTE = ['#000000', '#FFFFFF'];
 
 export const PALETTE = [
@@ -15,14 +13,12 @@ export const PALETTE = [
 	'#FFB3C8'
 ];
 
-export const generateRandomJpegFromColors = (
-	width: number,
-	height: number,
-	hex_colors: string[]
-): string => {
-	const canvas = createCanvas(width, height);
+export const fillFromColorPalette = (canvas: HTMLCanvasElement, hex_colors: string[]) => {
 	const ctx = canvas.getContext('2d');
-	const image_data = ctx.createImageData(width, height);
+	if (ctx === null) {
+		throw new Error('Canvas is null');
+	}
+	const image_data = ctx.createImageData(canvas.width, canvas.height);
 	const rgb_colors = hex_colors.map(hexToRgb);
 	for (let i = 0; i < image_data.data.length; i += 4) {
 		const [r, g, b] = rgb_colors[Math.floor(Math.random() * rgb_colors.length)];
@@ -32,25 +28,6 @@ export const generateRandomJpegFromColors = (
 		image_data.data[i + 3] = 255;
 	}
 	ctx.putImageData(image_data, 0, 0);
-	return canvas.toDataURL('image/jpeg');
-};
-
-export const fillFromColorPalette = (canvas: HTMLCanvasElement | Canvas, hex_colors: string[]) => {
-	const ctx = canvas.getContext('2d');
-	if (ctx === null) {
-		throw new Error('Canvas is null');
-	}
-	const casted_ctx = ctx as CanvasRenderingContext2D;
-	const image_data = casted_ctx.createImageData(canvas.width, canvas.height);
-	const rgb_colors = hex_colors.map(hexToRgb);
-	for (let i = 0; i < image_data.data.length; i += 4) {
-		const [r, g, b] = rgb_colors[Math.floor(Math.random() * rgb_colors.length)];
-		image_data.data[i] = r;
-		image_data.data[i + 1] = g;
-		image_data.data[i + 2] = b;
-		image_data.data[i + 3] = 255;
-	}
-	casted_ctx.putImageData(image_data, 0, 0);
 };
 
 const hexToRgb = (hex: string): [number, number, number] => {

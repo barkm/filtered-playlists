@@ -7,18 +7,26 @@
 		palette?: string[];
 		width?: number;
 		height?: number;
+		canvas?: HTMLCanvasElement;
 	}
 
-	let { update_ms, palette = PALETTE, width = 3, height = 3 }: Props = $props();
+	let {
+		update_ms,
+		palette = PALETTE,
+		width = 3,
+		height = 3,
+		canvas: canvas_element = $bindable()
+	}: Props = $props();
 
-	let canvas_element: HTMLCanvasElement;
+	const fill_canvas = () => {
+		if (canvas_element) {
+			fillFromColorPalette(canvas_element, palette);
+		}
+	};
 
 	onMount(() => {
-		setInterval(() => {
-			if (canvas_element) {
-				fillFromColorPalette(canvas_element, palette);
-			}
-		}, update_ms);
+		fill_canvas();
+		setInterval(fill_canvas, update_ms);
 	});
 </script>
 
