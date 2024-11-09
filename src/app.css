@@ -32,9 +32,11 @@ button:disabled:hover {
 	color: gray;
 }
 
-button:hover {
-	background-color: black;
-	color: white;
+@media (hover: hover) {
+	button:hover {
+		background-color: black;
+		color: white;
+	}
 }
 
 div.multiselect {
