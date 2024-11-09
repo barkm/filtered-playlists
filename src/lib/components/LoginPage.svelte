@@ -12,17 +12,17 @@
 	let permissions = $state([
 		{
 			scope: 'playlist-modify-public',
-			label_data: 'create and edit public playlists',
+			label_data: 'public playlists - create & edit',
 			value: false
 		},
 		{
 			scope: 'playlist-read-private',
-			label_data: 'read private playlists',
+			label_data: 'private playlists - list & read',
 			value: false
 		},
 		{
 			scope: 'playlist-modify-private',
-			label_data: 'create and edit private playlists',
+			label_data: 'private playlists - create & edit',
 			value: false
 		}
 	]);
