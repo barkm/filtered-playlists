@@ -24,7 +24,7 @@
 	let excluded_playlists: Playlist[] = $state([]);
 	let required_playlists: Playlist[] = $state([]);
 
-	let canvas: HTMLCanvasElement;
+	let canvas: HTMLCanvasElement | undefined = $state(undefined);
 
 	let placeholder = $state('');
 	const text = 'new playlist name';
@@ -59,6 +59,10 @@
 	<button
 		disabled={playlist_name === '' || included_playlists.length === 0}
 		onclick={async () => {
+			if (!canvas) {
+				console.log('no canvas');
+				return;
+			}
 			const synchronized_playlist = await createSynchronizedPlaylist(
 				canvas.toDataURL('image/jpeg'),
 				playlist_name,
