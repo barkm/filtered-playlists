@@ -44,23 +44,25 @@
 	};
 </script>
 
-{#if !has_access}
-	<NoAccess />
-{:else if user !== null && (synchronized_playlists === null || playlists === null)}
-	<Loading />
-{:else if user !== null && synchronized_playlists !== null && playlists !== null}
-	<div class="container">
-		<div class="content">
+<div class="container">
+	<div class="content">
+		{#if !has_access}
+			<NoAccess />
+		{:else if user !== null && (synchronized_playlists === null || playlists === null)}
+			<Loading />
+		{:else if user !== null && synchronized_playlists !== null && playlists !== null}
 			<button onclick={synchronize_all}>synchronize all</button>
 			<CreateSynchronizedPlaylist {playlists} bind:synchronized_playlists />
 			<SynchronizedPlaylists {synchronized_playlists} />
-		</div>
-		<div class="footer">
-			<button onclick={logoutAndReset}>log out</button>
-			<div>signed in as {user.display_name}</div>
-		</div>
+		{/if}
 	</div>
-{/if}
+	<div class="footer">
+		<button onclick={logoutAndReset}>log out</button>
+		{#if user !== null}
+			<div>signed in as {user.display_name}</div>
+		{/if}
+	</div>
+</div>
 
 <style>
 	.container {
