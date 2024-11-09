@@ -11,7 +11,7 @@
 </script>
 
 {#if synchronized_playlists.length}
-	{#each synchronized_playlists as synchronized_playlist}
+	{#each synchronized_playlists as synchronized_playlist (synchronized_playlist.playlist.id)}
 		<SynchronizedPlaylistRow
 			{synchronized_playlist}
 			onRemove={() => {
