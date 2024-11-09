@@ -1,10 +1,6 @@
-import { getAccessToken, authorizedRequest } from './authorization';
+import { authorizedRequest } from './authorization';
 
 export class NoAccessError extends Error {}
-
-export const isLoggedIn = async (): Promise<boolean> => {
-	return (await getAccessToken()) !== null;
-};
 
 export interface User {
 	id: string;

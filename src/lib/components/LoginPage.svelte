@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import Main from './Main.svelte';
 	import { is_logged_in } from '$lib/store';
-	import { isLoggedIn } from '$lib/spotify/api';
+	import { isLoggedIn } from '$lib/spotify/authorization';
 	import PermissionsSelector from './MultiSelector.svelte';
 
 	const default_scopes = ['ugc-image-upload'];

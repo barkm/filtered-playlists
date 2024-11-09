@@ -74,6 +74,10 @@ export const handleCallback = async () => {
 	window.location.replace(fromLocalStorage('redirect_uri') || '/');
 };
 
+export const isLoggedIn = async (): Promise<boolean> => {
+	return (await getAccessToken()) !== null;
+};
+
 export const authorizedRequest = async (
 	url: string,
 	method: string,
