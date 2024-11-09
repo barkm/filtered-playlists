@@ -103,6 +103,8 @@ export const logout = () => {
 	removeFromLocalStorage('expires_at');
 	removeFromLocalStorage('refresh_token');
 	removeFromLocalStorage('scopes');
+	removeFromLocalStorage('code_verifier');
+	removeFromLocalStorage('redirect_uri');
 };
 
 const toLocalStorage = (key: string, value: string) => {
