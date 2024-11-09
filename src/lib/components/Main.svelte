@@ -67,6 +67,7 @@
 		min-width: 300px;
 		max-width: 500px;
 		flex-grow: 1;
+		margin-bottom: 1em;
 	}
 
 	.footer {
