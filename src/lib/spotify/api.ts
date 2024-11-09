@@ -12,15 +12,7 @@ export interface User {
 }
 
 export const getUser = async (): Promise<User> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
-	const response = await fetch('https://api.spotify.com/v1/me', {
-		headers: {
-			Authorization: `Bearer ${access_token}`
-		}
-	});
+	const response = await authorizedRequest('https://api.spotify.com/v1/me', 'GET');
 	if (response.status == 403) {
 		throw new NoAccessError();
 	}
@@ -39,15 +31,10 @@ export interface Playlist {
 }
 
 export const getPlaylist = async (playlist_id: string): Promise<Playlist> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
-	const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}`, {
-		headers: {
-			Authorization: `Bearer ${access_token}`
-		}
-	});
+	const response = await authorizedRequest(
+		`https://api.spotify.com/v1/playlists/${playlist_id}`,
+		'GET'
+	);
 	if (response.status != 200) {
 		throw new Error('Failed to fetch playlist');
 	}
@@ -63,18 +50,10 @@ export const getPlaylist = async (playlist_id: string): Promise<Playlist> => {
 };
 
 export const getPlaylists = async (): Promise<Playlist[]> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
 	let playlists: Playlist[] = [];
 	let url = 'https://api.spotify.com/v1/me/playlists';
 	while (url) {
-		const response = await fetch(url, {
-			headers: {
-				Authorization: `Bearer ${access_token}`
-			}
-		});
+		const response = await authorizedRequest(url, 'GET');
 		if (response.status != 200) {
 			throw new Error('Failed to fetch playlists');
 		}
@@ -99,23 +78,17 @@ export const createPlaylist = async (
 	is_public: boolean,
 	description: string
 ): Promise<Playlist> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
 	const user = await getUser();
-	const response = await fetch(`https://api.spotify.com/v1/users/${user.id}/playlists`, {
-		method: 'POST',
-		headers: {
-			Authorization: `Bearer ${access_token}`,
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
+	const response = await authorizedRequest(
+		`https://api.spotify.com/v1/users/${user.id}/playlists`,
+		'POST',
+		'application/json',
+		JSON.stringify({
 			name: name,
 			public: is_public,
 			description: description
 		})
-	});
+	);
 	if (response.status != 201) {
 		throw new Error('Failed to create playlist');
 	}
@@ -129,16 +102,11 @@ export const createPlaylist = async (
 };
 
 export const unfollowPlaylist = async (playlist_id: string): Promise<void> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
-	const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/followers`, {
-		method: 'DELETE',
-		headers: {
-			Authorization: `Bearer ${access_token}`
-		}
-	});
+	const response = await authorizedRequest(
+		`https://api.spotify.com/v1/playlists/${playlist_id}/followers`,
+		'DELETE',
+		'application/json'
+	);
 	if (response.status != 200) {
 		throw new Error('Failed to unfollow playlist');
 	}
@@ -150,18 +118,10 @@ export interface Track {
 }
 
 export const getTracks = async (playlist_id: string): Promise<Track[]> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
 	let url = `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`;
 	let tracks: Track[] = [];
 	while (url) {
-		const response = await fetch(url, {
-			headers: {
-				Authorization: `Bearer ${access_token}`
-			}
-		});
+		const response = await authorizedRequest(url, 'GET');
 		if (response.status != 200) {
 			throw new Error('Failed to fetch tracks');
 		}
@@ -178,10 +138,6 @@ export const getTracks = async (playlist_id: string): Promise<Track[]> => {
 };
 
 export const addTracks = async (playlist_id: string, track_uris: string[]): Promise<void> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
 	const track_uris_chunks = chunkArray(track_uris, 100);
 	for (const chunk of track_uris_chunks) {
 		await addTracksChunk(playlist_id, chunk);
@@ -197,40 +153,28 @@ const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
 };
 
 const addTracksChunk = async (playlist_id: string, track_uris: string[]): Promise<void> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
-	const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, {
-		method: 'POST',
-		headers: {
-			Authorization: `Bearer ${access_token}`,
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
+	const response = await authorizedRequest(
+		`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
+		'POST',
+		'application/json',
+		JSON.stringify({
 			uris: track_uris
 		})
-	});
+	);
 	if (response.status != 201) {
 		throw new Error('Failed to add tracks');
 	}
 };
 
 export const replaceTracks = async (playlist_id: string, track_uris: string[]): Promise<void> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
-	const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`, {
-		method: 'PUT',
-		headers: {
-			Authorization: `Bearer ${access_token}`,
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({
+	const response = await authorizedRequest(
+		`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
+		'PUT',
+		'application/json',
+		JSON.stringify({
 			uris: []
 		})
-	});
+	);
 	if (response.status != 201 && response.status != 200) {
 		throw new Error('Failed to replace tracks');
 	}
@@ -241,18 +185,12 @@ export const addPlaylistCoverImage = async (
 	playlist_id: string,
 	image_data: string
 ): Promise<void> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
-	const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/images`, {
-		method: 'PUT',
-		headers: {
-			Authorization: `Bearer ${access_token}`,
-			'Content-Type': 'image/jpeg'
-		},
-		body: image_data
-	});
+	const response = await authorizedRequest(
+		`https://api.spotify.com/v1/playlists/${playlist_id}/images`,
+		'PUT',
+		'image/jpeg',
+		image_data
+	);
 	if (response.status != 202) {
 		throw new Error('Failed to add cover image');
 	}
@@ -267,15 +205,10 @@ export interface CoverImage {
 export const getPlaylistCoverImage = async (
 	playlist_id: string
 ): Promise<CoverImage | undefined> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
-	const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist_id}/images`, {
-		headers: {
-			Authorization: `Bearer ${access_token}`
-		}
-	});
+	const response = await authorizedRequest(
+		`https://api.spotify.com/v1/playlists/${playlist_id}/images`,
+		'GET'
+	);
 	if (response.status != 200) {
 		throw new Error('Failed to fetch cover image');
 	}
@@ -289,4 +222,28 @@ export const getPlaylistCoverImage = async (
 		width: image.width,
 		height: image.height
 	};
+};
+
+const authorizedRequest = async (
+	url: string,
+	method: string,
+	content_type?: string,
+	body?: string
+): Promise<Response> => {
+	const access_token = await getAccessToken();
+	if (!access_token) {
+		throw new Error('No access token');
+	}
+	let headers: { Authorization: string; 'Content-Type'?: string } = {
+		Authorization: `Bearer ${access_token}`
+	};
+	if (content_type) {
+		headers['Content-Type'] = content_type;
+	}
+	const response = await fetch(url, {
+		method: method,
+		headers: headers,
+		body: body
+	});
+	return response;
 };
