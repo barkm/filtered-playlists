@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Playlist } from '$lib/spotify/api';
 	import { synchronize, type SynchronizedPlaylist } from '$lib/synchronized';
-	import { slide } from 'svelte/transition';
 
 	interface Props {
 		synchronized_playlist: SynchronizedPlaylist;
