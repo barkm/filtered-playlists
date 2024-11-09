@@ -29,8 +29,8 @@
 {:else}
 	<div class="container">
 		<div class="content">
-			<SynchronizedPlaylists {synchronized_playlists} />
 			<CreateSynchronizedPlaylist {playlists} bind:synchronized_playlists />
+			<SynchronizedPlaylists {synchronized_playlists} />
 		</div>
 		<div class="footer">
 			<button onclick={logoutAndReset}>log out</button>
