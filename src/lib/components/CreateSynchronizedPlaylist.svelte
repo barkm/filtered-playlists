@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { type Playlist } from '$lib/spotify/api';
 	import { createSynchronizedPlaylist, type SynchronizedPlaylist } from '$lib/synchronized';
+	import { onMount } from 'svelte';
 	import PlaylistDropdown from './PlaylistDropdown.svelte';
+	import PlaylistPrivacy from './PlaylistPrivacy.svelte';
 	import RandomSquare from './RandomSquare.svelte';
 
 	interface Props {
@@ -13,6 +15,7 @@
 
 	let playlist_name = $state('');
 
+	let is_public = $state(true);
 	let included_playlists: Playlist[] = $state([]);
 	let excluded_playlists: Playlist[] = $state([]);
 	let required_playlists: Playlist[] = $state([]);
@@ -36,6 +39,10 @@
 		index = 0;
 		setTimeout(type, 1000);
 	}
+
+	onMount(() => {
+		type();
+	});
 </script>
 
 <inputrow>
@@ -50,7 +57,8 @@
 				playlist_name,
 				included_playlists,
 				excluded_playlists,
-				required_playlists
+				required_playlists,
+				is_public
 			);
 			synchronized_playlists = [...synchronized_playlists, synchronized_playlist];
 			playlist_name = '';
@@ -63,6 +71,7 @@
 
 {#if playlist_name !== ''}
 	<filters>
+		<PlaylistPrivacy bind:is_public />
 		<PlaylistDropdown
 			placeholder="include"
 			{playlists}
@@ -102,8 +111,6 @@
 		border: none;
 		border-bottom: 1px solid black;
 		outline: none;
-		padding-left: 1em;
-		padding-right: 1em;
 		font-size: 1em;
 		border-radius: 0;
 		min-width: 0;
@@ -116,6 +123,7 @@
 	}
 
 	filters {
+		margin-top: 1em;
 		width: 100%;
 	}
 </style>

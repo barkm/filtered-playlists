@@ -25,9 +25,10 @@ export const createSynchronizedPlaylist = async (
 	name: string,
 	included_playlists: Playlist[],
 	excluded_playlists: Playlist[],
-	required_playlists: Playlist[]
+	required_playlists: Playlist[],
+	is_public: boolean
 ): Promise<SynchronizedPlaylist> => {
-	const playlist = await createPlaylist(name, '');
+	const playlist = await createPlaylist(name, is_public, '');
 	const synchronized_playlist = {
 		playlist,
 		included_playlists,

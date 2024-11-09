@@ -89,7 +89,11 @@ export const getPlaylists = async (): Promise<Playlist[]> => {
 	return playlists;
 };
 
-export const createPlaylist = async (name: string, description: string): Promise<Playlist> => {
+export const createPlaylist = async (
+	name: string,
+	is_public: boolean,
+	description: string
+): Promise<Playlist> => {
 	const access_token = await getAccessToken();
 	if (!access_token) {
 		throw new Error('No access token');
@@ -103,6 +107,7 @@ export const createPlaylist = async (name: string, description: string): Promise
 		},
 		body: JSON.stringify({
 			name: name,
+			public: is_public,
 			description: description
 		})
 	});
