@@ -13,9 +13,14 @@
 		<choice>
 			<button
 				aria-label={'choice'}
-				onclick={() => (selections[i].value = !value)}
-				style="background-color:{value ? 'black' : 'transparent'}"><div></div></button
+				onclick={(event) => {
+					selections[i].value = !value;
+					const button = event.target as HTMLButtonElement;
+					button.style.backgroundColor = value ? 'black' : 'transparent';
+				}}
 			>
+				<div></div>
+			</button>
 			{@render label(label_data)}
 		</choice>
 	{/each}
