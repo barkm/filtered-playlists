@@ -3,7 +3,11 @@
 	import { onMount } from 'svelte';
 	import SynchronizedPlaylists from './ListSynchronizedPlaylists.svelte';
 	import CreateSynchronizedPlaylist from './CreateSynchronizedPlaylist.svelte';
-	import { getSynchronizedPlaylists, type SynchronizedPlaylist } from '$lib/synchronized';
+	import {
+		getSynchronizedPlaylists,
+		synchronize,
+		type SynchronizedPlaylist
+	} from '$lib/synchronized';
 	import { logout } from '$lib/spotify/authorization';
 	import { is_logged_in } from '$lib/store';
 	import Loading from './Loading.svelte';
@@ -22,6 +26,12 @@
 		logout();
 		$is_logged_in = false;
 	};
+
+	const synchronize_all = async () => {
+		if (synchronized_playlists !== null) {
+			await Promise.all(synchronized_playlists.map(synchronize));
+		}
+	};
 </script>
 
 {#if user === null || synchronized_playlists === null || playlists === null}
@@ -29,6 +39,7 @@
 {:else}
 	<div class="container">
 		<div class="content">
+			<button onclick={synchronize_all}>synchronize all</button>
 			<CreateSynchronizedPlaylist {playlists} bind:synchronized_playlists />
 			<SynchronizedPlaylists {synchronized_playlists} />
 		</div>
