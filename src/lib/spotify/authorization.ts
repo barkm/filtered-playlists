@@ -35,6 +35,10 @@ export const handleCallback = async () => {
 		throw new Error('No code verifier');
 	}
 	const url = new URL(window.location.href);
+	if (url.searchParams.has('error')) {
+		window.location.replace(fromLocalStorage('redirect_uri') || '/');
+		return;
+	}
 	const code = url.searchParams.get('code');
 	if (!code) {
 		throw new Error('No code');
