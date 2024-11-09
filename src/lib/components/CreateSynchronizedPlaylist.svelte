@@ -5,6 +5,7 @@
 	import PlaylistDropdown from './PlaylistDropdown.svelte';
 	import PlaylistPrivacy from './PlaylistPrivacy.svelte';
 	import RandomSquare from './RandomSquare.svelte';
+	import { getScopes } from '$lib/spotify/authorization';
 
 	interface Props {
 		playlists: Playlist[];
@@ -15,7 +16,10 @@
 
 	let playlist_name = $state('');
 
-	let is_public = $state(true);
+	let scopes = getScopes();
+	let is_public = $state(!scopes.includes('playlist-modify-private'));
+	let enable_privacy_selection =
+		scopes.includes('playlist-modify-private') && scopes.includes('playlist-modify-public');
 	let included_playlists: Playlist[] = $state([]);
 	let excluded_playlists: Playlist[] = $state([]);
 	let required_playlists: Playlist[] = $state([]);
@@ -71,7 +75,9 @@
 
 {#if playlist_name !== ''}
 	<filters>
-		<PlaylistPrivacy bind:is_public />
+		{#if enable_privacy_selection}
+			<PlaylistPrivacy bind:is_public />
+		{/if}
 		<PlaylistDropdown
 			placeholder="include"
 			{playlists}
