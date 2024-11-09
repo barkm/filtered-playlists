@@ -80,7 +80,7 @@ export const isLoggedIn = async (): Promise<boolean> => {
 
 export const authorizedRequest = async (
 	url: string,
-	method: string,
+	method: 'GET' | 'POST' | 'PUT' | 'DELETE',
 	content_type?: string,
 	body?: string
 ): Promise<Response> => {
