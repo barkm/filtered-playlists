@@ -1,28 +1,17 @@
 <script lang="ts">
-	import { getPlaylists, getUser, NoAccessError, type Playlist, type User } from '$lib/spotify/api';
+	import { getUser, NoAccessError, type User } from '$lib/spotify/api';
 	import { onMount } from 'svelte';
-	import SynchronizedPlaylists from './ListSynchronizedPlaylists.svelte';
-	import CreateSynchronizedPlaylist from './CreateSynchronizedPlaylist.svelte';
-	import {
-		getSynchronizedPlaylists,
-		synchronize,
-		type SynchronizedPlaylist
-	} from '$lib/synchronized';
+	import SynchronizedPlaylists from './SynchronizedPlaylists.svelte';
 	import { logout } from '$lib/spotify/authorization';
 	import { is_logged_in } from '$lib/store';
-	import Loading from './Loading.svelte';
 	import NoAccess from './NoAccess.svelte';
 
 	let has_access = $state(true);
 	let user: User | null = $state(null);
-	let synchronized_playlists: SynchronizedPlaylist[] | null = $state(null);
-	let playlists: Playlist[] | null = $state(null);
 
 	onMount(async () => {
 		try {
 			user = await getUser();
-			synchronized_playlists = await getSynchronizedPlaylists();
-			playlists = await getPlaylists();
 		} catch (error) {
 			if (error instanceof NoAccessError) {
 				has_access = false;
@@ -36,24 +25,14 @@
 		logout();
 		$is_logged_in = false;
 	};
-
-	const synchronize_all = async () => {
-		if (synchronized_playlists !== null) {
-			await Promise.all(synchronized_playlists.map(synchronize));
-		}
-	};
 </script>
 
 <div class="container">
 	<div class="content">
 		{#if !has_access}
 			<NoAccess />
-		{:else if user !== null && (synchronized_playlists === null || playlists === null)}
-			<Loading />
-		{:else if user !== null && synchronized_playlists !== null && playlists !== null}
-			<button onclick={synchronize_all}>synchronize all</button>
-			<CreateSynchronizedPlaylist {playlists} bind:synchronized_playlists />
-			<SynchronizedPlaylists {synchronized_playlists} />
+		{:else if user !== null}
+			<SynchronizedPlaylists />
 		{/if}
 	</div>
 	<div class="footer">
