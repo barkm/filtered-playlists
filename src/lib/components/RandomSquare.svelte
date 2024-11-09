@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { generateRandomJpegFromColors, PALETTE } from '$lib/jpeg/generate';
+	import { fillFromColorPalette, PALETTE } from '$lib/jpeg/generate';
 
 	interface Props {
 		update_ms: number;
@@ -11,23 +11,21 @@
 
 	let { update_ms, palette = PALETTE, width = 3, height = 3 }: Props = $props();
 
-	const generate_image = () => {
-		return generateRandomJpegFromColors(width, height, palette);
-	};
-
-	let image_data = $state(generate_image());
+	let canvas_element: HTMLCanvasElement;
 
 	onMount(() => {
 		setInterval(() => {
-			image_data = generate_image();
+			if (canvas_element) {
+				fillFromColorPalette(canvas_element, palette);
+			}
 		}, update_ms);
 	});
 </script>
 
-<img src={image_data} alt="random square" />
+<canvas bind:this={canvas_element} {width} {height}></canvas>
 
 <style>
-	img {
+	canvas {
 		width: var(--width);
 		height: var(--height);
 		max-width: var(--max-width);
