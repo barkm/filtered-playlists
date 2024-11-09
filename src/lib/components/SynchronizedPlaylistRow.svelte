@@ -26,18 +26,7 @@
 		<a href={synchronized_playlist.playlist.spotify_url} target="_blank">
 			<img src={synchronized_playlist.playlist.cover?.url} alt="cover" />
 		</a>
-		<button
-			class="playlistname"
-			onclick={() => {
-				show_details = !show_details;
-			}}
-			onmouseenter={() => {
-				show_details = true;
-			}}
-			onmouseleave={() => {
-				show_details = false;
-			}}
-		>
+		<button class="playlistname" onclick={() => (show_details = !show_details)}>
 			{synchronized_playlist.playlist.name}
 		</button>
 		<button class="click" onclick={() => synchronize(synchronized_playlist)}>sync</button>
