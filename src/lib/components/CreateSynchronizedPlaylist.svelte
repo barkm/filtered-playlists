@@ -64,7 +64,7 @@
 				required_playlists,
 				is_public
 			);
-			synchronized_playlists = [...synchronized_playlists, synchronized_playlist];
+			synchronized_playlists = [synchronized_playlist, ...synchronized_playlists];
 			playlist_name = '';
 			included_playlists = [];
 			excluded_playlists = [];
