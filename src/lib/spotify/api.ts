@@ -1,5 +1,7 @@
 import { getAccessToken } from './authorization';
 
+export class NoAccessError extends Error {}
+
 export const isLoggedIn = async (): Promise<boolean> => {
 	return (await getAccessToken()) !== null;
 };
@@ -19,6 +21,9 @@ export const getUser = async (): Promise<User> => {
 			Authorization: `Bearer ${access_token}`
 		}
 	});
+	if (response.status == 403) {
+		throw new NoAccessError();
+	}
 	if (response.status != 200) {
 		throw new Error('Failed to fetch user');
 	}
@@ -79,7 +84,7 @@ export const getPlaylists = async (): Promise<Playlist[]> => {
 				id: item.id,
 				name: item.name,
 				description: item.description,
-				cover: item.images.length > 0 ? item.images[item.images.length - 1] : null,
+				cover: item.images?.length > 0 ? item.images[item.images.length - 1] : null,
 				spotify_url: item.external_urls.spotify
 			})
 		);
