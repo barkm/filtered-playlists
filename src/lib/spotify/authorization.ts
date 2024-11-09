@@ -4,19 +4,12 @@ import { PUBLIC_SPOTIFY_CLIENT_ID } from '$env/static/public';
 
 const CONFIG = {
 	client_id: PUBLIC_SPOTIFY_CLIENT_ID,
-	redirect_endpoint: base + '/callback',
-	scope: [
-		'user-read-currently-playing',
-		'playlist-read-private',
-		'playlist-modify-private',
-		'playlist-modify-public',
-		'ugc-image-upload'
-	]
+	redirect_endpoint: base + '/callback'
 };
 
 const LOCAL_STORAGE_PREFIX = 'synchronized_playlists';
 
-export const login = async (): Promise<void> => {
+export const login = async (scopes: string[]): Promise<void> => {
 	const code_verifier = generateRandomString(64);
 	toLocalStorage('code_verifier', code_verifier);
 	const hashed = await sha256(code_verifier);
@@ -24,7 +17,7 @@ export const login = async (): Promise<void> => {
 	const params = {
 		response_type: 'code',
 		client_id: CONFIG.client_id,
-		scope: CONFIG.scope.join(' '),
+		scope: scopes.join(' '),
 		code_challenge_method: 'S256',
 		code_challenge: code_challenge,
 		redirect_uri: window.location.origin + CONFIG.redirect_endpoint

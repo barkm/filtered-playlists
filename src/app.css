@@ -18,6 +18,7 @@ button {
 button:disabled {
 	background-color: transparent;
 	color: gray;
+	border-color: gray;
 }
 
 button:disabled:hover {
