@@ -4,12 +4,15 @@
 
 	interface Props {
 		update_ms: number;
+		palette?: string[];
+		width?: number;
+		height?: number;
 	}
 
-	let { update_ms }: Props = $props();
+	let { update_ms, palette = PALETTE, width = 3, height = 3 }: Props = $props();
 
 	const generate_image = () => {
-		return generateRandomJpegFromColors(3, 3, PALETTE);
+		return generateRandomJpegFromColors(width, height, palette);
 	};
 
 	let image_data = $state(generate_image());
@@ -28,5 +31,6 @@
 		width: var(--width);
 		height: var(--height);
 		max-width: var(--max-width);
+		image-rendering: var(--image-rendering);
 	}
 </style>
