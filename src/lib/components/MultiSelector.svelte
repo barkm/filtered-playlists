@@ -11,8 +11,10 @@
 <choices>
 	{#each selections as { label_data, value }, i}
 		<choice>
-			<button aria-label={'choice'} onclick={() => (selections[i].value = !value)}
-				><div style="background-color:{value ? 'black' : 'transparent'}"></div></button
+			<button
+				aria-label={'choice'}
+				onclick={() => (selections[i].value = !value)}
+				style="background-color:{value ? 'black' : 'transparent'}"><div></div></button
 			>
 			{@render label(label_data)}
 		</choice>
@@ -39,13 +41,7 @@
 		border: 1px solid black;
 		margin-right: 10px;
 		padding: 0;
-	}
-
-	button div {
 		width: 1em;
 		height: 1em;
-	}
-	span {
-		font-size: 1em;
 	}
 </style>
