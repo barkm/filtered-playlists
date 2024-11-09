@@ -1,4 +1,4 @@
-import { getAccessToken } from './authorization';
+import { getAccessToken, authorizedRequest } from './authorization';
 
 export class NoAccessError extends Error {}
 
@@ -222,28 +222,4 @@ export const getPlaylistCoverImage = async (
 		width: image.width,
 		height: image.height
 	};
-};
-
-const authorizedRequest = async (
-	url: string,
-	method: string,
-	content_type?: string,
-	body?: string
-): Promise<Response> => {
-	const access_token = await getAccessToken();
-	if (!access_token) {
-		throw new Error('No access token');
-	}
-	let headers: { Authorization: string; 'Content-Type'?: string } = {
-		Authorization: `Bearer ${access_token}`
-	};
-	if (content_type) {
-		headers['Content-Type'] = content_type;
-	}
-	const response = await fetch(url, {
-		method: method,
-		headers: headers,
-		body: body
-	});
-	return response;
 };

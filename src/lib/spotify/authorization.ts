@@ -74,6 +74,30 @@ export const handleCallback = async () => {
 	window.location.replace(fromLocalStorage('redirect_uri') || '/');
 };
 
+export const authorizedRequest = async (
+	url: string,
+	method: string,
+	content_type?: string,
+	body?: string
+): Promise<Response> => {
+	const access_token = await getAccessToken();
+	if (!access_token) {
+		throw new Error('No access token');
+	}
+	let headers: { Authorization: string; 'Content-Type'?: string } = {
+		Authorization: `Bearer ${access_token}`
+	};
+	if (content_type) {
+		headers['Content-Type'] = content_type;
+	}
+	const response = await fetch(url, {
+		method: method,
+		headers: headers,
+		body: body
+	});
+	return response;
+};
+
 export const getAccessToken = async (): Promise<string | null> => {
 	const access_token = fromLocalStorage('access_token');
 	const expires_at = fromLocalStorage('expires_at');
