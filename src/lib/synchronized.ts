@@ -5,7 +5,6 @@ import {
 	addTracks,
 	createPlaylist,
 	getPlaylistCoverImage,
-	getTracks,
 	replaceTracks,
 	type Playlist,
 	type Track
@@ -50,7 +49,8 @@ export const createSynchronizedPlaylist = async (
 			await new Promise((resolve) => setTimeout(resolve, 500));
 		}
 	}
-	const tracks = await getAndFilterTracks(synchronized_playlist);
+	const request_cacher = new RequestCacher();
+	const tracks = await getAndFilterTracks(request_cacher, synchronized_playlist);
 	addTracks(
 		playlist.id,
 		tracks.map((track) => track.uri)
@@ -142,8 +142,11 @@ const toSynchronizedPlaylist = async (
 	};
 };
 
-export const synchronize = async (synchronized_playlist: SynchronizedPlaylist): Promise<void> => {
-	const tracks = await getAndFilterTracks(synchronized_playlist);
+export const synchronize = async (
+	synchronized_playlist: SynchronizedPlaylist,
+	request_cacher: RequestCacher
+): Promise<void> => {
+	const tracks = await getAndFilterTracks(request_cacher, synchronized_playlist);
 	replaceTracks(
 		synchronized_playlist.playlist.id,
 		tracks.map((track) => track.uri)
@@ -151,11 +154,21 @@ export const synchronize = async (synchronized_playlist: SynchronizedPlaylist): 
 };
 
 const getAndFilterTracks = async (
+	request_cacher: RequestCacher,
 	synchronized_playlist: SynchronizedPlaylist
 ): Promise<Track[]> => {
-	const included_tracks = await getTracksFromPlaylists(synchronized_playlist.included_playlists);
-	const excluded_tracks = await getTracksFromPlaylists(synchronized_playlist.excluded_playlists);
-	const required_tracks = await getTracksFromPlaylists(synchronized_playlist.required_playlists);
+	const included_tracks = await getTracksFromPlaylists(
+		request_cacher,
+		synchronized_playlist.included_playlists
+	);
+	const excluded_tracks = await getTracksFromPlaylists(
+		request_cacher,
+		synchronized_playlist.excluded_playlists
+	);
+	const required_tracks = await getTracksFromPlaylists(
+		request_cacher,
+		synchronized_playlist.required_playlists
+	);
 	return filterTracks(included_tracks, excluded_tracks, required_tracks);
 };
 
@@ -172,8 +185,13 @@ export const filterTracks = (
 	return tracks;
 };
 
-export const getTracksFromPlaylists = async (playlists: Playlist[]): Promise<Track[]> => {
-	const tracks = await Promise.all(playlists.map((playlist) => getTracks(playlist.id)));
+export const getTracksFromPlaylists = async (
+	request_cacher: RequestCacher,
+	playlists: Playlist[]
+): Promise<Track[]> => {
+	const tracks = await Promise.all(
+		playlists.map((playlist) => request_cacher.getTracks(playlist.id))
+	);
 	return tracks.flat();
 };
 

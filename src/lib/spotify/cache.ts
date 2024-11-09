@@ -1,4 +1,4 @@
-import { getPlaylist, getPlaylists, type Playlist } from './api';
+import { getPlaylist, getPlaylists, getTracks, type Playlist, type Track } from './api';
 import { authorizedRequest } from './authorization';
 
 export class RequestCacher {
@@ -32,5 +32,9 @@ export class RequestCacher {
 
 	getPlaylist = async (playlist_id: string): Promise<Playlist> => {
 		return await getPlaylist(this.makeRequest, playlist_id);
+	};
+
+	getTracks = async (playlist_id: string): Promise<Track[]> => {
+		return await getTracks(this.makeRequest, playlist_id);
 	};
 }

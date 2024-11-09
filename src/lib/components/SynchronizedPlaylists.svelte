@@ -22,7 +22,8 @@
 
 	const synchronize_all = async () => {
 		if (synchronized_playlists !== null) {
-			await Promise.all(synchronized_playlists.map(synchronize));
+			const request_cacher = new RequestCacher();
+			await Promise.all(synchronized_playlists.map((p) => synchronize(p, request_cacher)));
 		}
 	};
 </script>

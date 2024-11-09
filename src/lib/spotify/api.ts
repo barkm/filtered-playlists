@@ -128,15 +128,14 @@ export interface Track {
 	name: string;
 }
 
-export const getTracks = async (playlist_id: string): Promise<Track[]> => {
+export const getTracks = async (
+	make_request: MakeRequest,
+	playlist_id: string
+): Promise<Track[]> => {
 	let url: string | null = `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`;
 	let tracks: Track[] = [];
 	while (url) {
-		const response: GetTracksResponse = await authorizedRequest(
-			url,
-			'GET',
-			handleGetTracksResponse
-		);
+		const response: GetTracksResponse = await make_request(url, 'GET', handleGetTracksResponse);
 		url = response.next;
 		tracks = tracks.concat(response.tracks);
 	}
