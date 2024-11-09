@@ -4,7 +4,6 @@
 	import Main from './Main.svelte';
 	import { is_logged_in } from '$lib/store';
 	import { isLoggedIn } from '$lib/spotify/api';
-	import Loading from './Loading.svelte';
 	import PermissionsSelector from './MultiSelector.svelte';
 
 	const default_scopes = ['ugc-image-upload'];
@@ -43,9 +42,7 @@
 {/snippet}
 
 <page>
-	{#if $is_logged_in === null}
-		<Loading />
-	{:else if $is_logged_in}
+	{#if $is_logged_in}
 		<Main />
 	{:else}
 		<login>
