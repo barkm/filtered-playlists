@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getPlaylists, getUser, type Playlist, type User } from '$lib/spotify/api';
+	import { getPlaylists, getUser, NoAccessError, type Playlist, type User } from '$lib/spotify/api';
 	import { onMount } from 'svelte';
 	import SynchronizedPlaylists from './ListSynchronizedPlaylists.svelte';
 	import CreateSynchronizedPlaylist from './CreateSynchronizedPlaylist.svelte';
@@ -11,15 +11,25 @@
 	import { logout } from '$lib/spotify/authorization';
 	import { is_logged_in } from '$lib/store';
 	import Loading from './Loading.svelte';
+	import NoAccess from './NoAccess.svelte';
 
+	let has_access = $state(true);
 	let user: User | null = $state(null);
 	let synchronized_playlists: SynchronizedPlaylist[] | null = $state(null);
 	let playlists: Playlist[] | null = $state(null);
 
 	onMount(async () => {
-		user = await getUser();
-		synchronized_playlists = await getSynchronizedPlaylists();
-		playlists = await getPlaylists();
+		try {
+			user = await getUser();
+			synchronized_playlists = await getSynchronizedPlaylists();
+			playlists = await getPlaylists();
+		} catch (error) {
+			if (error instanceof NoAccessError) {
+				has_access = false;
+			} else {
+				throw error;
+			}
+		}
 	});
 
 	const logoutAndReset = () => {
@@ -34,9 +44,11 @@
 	};
 </script>
 
-{#if user === null || synchronized_playlists === null || playlists === null}
+{#if !has_access}
+	<NoAccess />
+{:else if user !== null && (synchronized_playlists === null || playlists === null)}
 	<Loading />
-{:else}
+{:else if user !== null && synchronized_playlists !== null && playlists !== null}
 	<div class="container">
 		<div class="content">
 			<button onclick={synchronize_all}>synchronize all</button>
@@ -55,7 +67,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		height: 95vh;
+		min-height: 95vh;
 		padding: 2.5vh;
 	}
 

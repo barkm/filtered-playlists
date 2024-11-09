@@ -1,5 +1,7 @@
 import { createCanvas } from 'canvas';
 
+export const BW_PALETTE = ['#000000', '#FFFFFF'];
+
 export const PALETTE = [
 	'#FF9AA7',
 	'#85D1B5',
