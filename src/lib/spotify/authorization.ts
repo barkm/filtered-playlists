@@ -102,7 +102,7 @@ export const authorizedRequest = async (
 	return response;
 };
 
-export const getAccessToken = async (): Promise<string | null> => {
+const getAccessToken = async (): Promise<string | null> => {
 	const access_token = fromLocalStorage('access_token');
 	const expires_at = fromLocalStorage('expires_at');
 	if (!access_token) {
