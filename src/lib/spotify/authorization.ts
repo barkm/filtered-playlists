@@ -58,16 +58,20 @@ export const handleCallback = async () => {
 	}
 	const access_token = body.access_token;
 	const refresh_token = body.refresh_token;
-	if (!access_token || !refresh_token) {
-		throw new Error('Reponse did not contain access token and refresh token');
+	const scope = body.scope;
+	if (!access_token || !refresh_token || !scope) {
+		throw new Error('Reponse did not contain access token, refresh or scope token');
 	}
 	const expires_at = Date.now() + 1000 * body.expires_in;
-	console.log('saving access tokens');
-	console.log(access_token, expires_at, refresh_token);
+	const scopes = scope.split(' ');
+
+	console.log('saving access tokens adn scopes');
+	console.log(access_token, expires_at, refresh_token, scopes);
 
 	toLocalStorage('access_token', access_token);
 	toLocalStorage('expires_at', expires_at.toString());
 	toLocalStorage('refresh_token', refresh_token);
+	toLocalStorage('scopes', JSON.stringify(scopes));
 	window.location.replace(fromLocalStorage('redirect_uri') || '/');
 };
 
@@ -90,10 +94,19 @@ export const getAccessToken = async (): Promise<string | null> => {
 	return access_token;
 };
 
+export const getScopes = (): string[] => {
+	const scopes = fromLocalStorage('scopes');
+	if (!scopes) {
+		return [];
+	}
+	return JSON.parse(scopes);
+};
+
 export const logout = () => {
 	removeFromLocalStorage('access_token');
 	removeFromLocalStorage('expires_at');
 	removeFromLocalStorage('refresh_token');
+	removeFromLocalStorage('scopes');
 };
 
 const toLocalStorage = (key: string, value: string) => {
