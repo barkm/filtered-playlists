@@ -1,4 +1,3 @@
-import { authorizedRequest } from './authorization';
 import type { MakeRequest } from './request';
 
 export class RequestCacher {
