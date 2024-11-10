@@ -16,6 +16,7 @@ export interface SynchronizedPlaylist {
 	included_playlists: Playlist[];
 	excluded_playlists: Playlist[];
 	required_playlists: Playlist[];
+	synchronizing: boolean;
 }
 
 export const createSynchronizedPlaylist = async (
@@ -28,10 +29,11 @@ export const createSynchronizedPlaylist = async (
 ): Promise<SynchronizedPlaylist> => {
 	const playlist = await createPlaylist(name, is_public, '');
 	const synchronized_playlist = {
-		playlist,
-		included_playlists,
-		excluded_playlists,
-		required_playlists
+		playlist: playlist,
+		included_playlists: included_playlists,
+		excluded_playlists: excluded_playlists,
+		required_playlists: required_playlists,
+		synchronizing: false
 	};
 	const definition = {
 		included_playlist_ids: included_playlists.map((playlist) => playlist.id),
@@ -74,10 +76,11 @@ export const createSynchronizedPlaylist = async (
 			}
 		: undefined;
 	return {
-		playlist,
-		included_playlists,
-		excluded_playlists,
-		required_playlists
+		playlist: playlist,
+		included_playlists: included_playlists,
+		excluded_playlists: excluded_playlists,
+		required_playlists: required_playlists,
+		synchronizing: false
 	};
 };
 
@@ -135,10 +138,11 @@ const toSynchronizedPlaylist = async (
 		definition.required_playlist_ids.map(cached_request.getPlaylist)
 	);
 	return {
-		playlist,
-		included_playlists,
-		excluded_playlists,
-		required_playlists
+		playlist: playlist,
+		included_playlists: included_playlists,
+		excluded_playlists: excluded_playlists,
+		required_playlists: required_playlists,
+		synchronizing: false
 	};
 };
 
@@ -146,11 +150,13 @@ export const synchronize = async (
 	synchronized_playlist: SynchronizedPlaylist,
 	request_cacher: RequestCacher
 ): Promise<void> => {
+	synchronized_playlist.synchronizing = true;
 	const tracks = await getAndFilterTracks(request_cacher, synchronized_playlist);
 	replaceTracks(
 		synchronized_playlist.playlist.id,
 		tracks.map((track) => track.uri)
 	);
+	synchronized_playlist.synchronizing = false;
 };
 
 const getAndFilterTracks = async (
