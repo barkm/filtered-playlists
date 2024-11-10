@@ -132,17 +132,17 @@ const toSynchronizedPlaylist = async (
 	const definition = JSON.parse(comment.toString());
 	const included_playlists = await Promise.all(
 		definition.included_playlist_ids.map((id: string) =>
-			getPlaylist(id, cached_request.makeRequest)
+			getPlaylist(id, cached_request.makeAuthorizedRequest)
 		)
 	);
 	const excluded_playlists = await Promise.all(
 		definition.excluded_playlist_ids.map((id: string) =>
-			getPlaylist(id, cached_request.makeRequest)
+			getPlaylist(id, cached_request.makeAuthorizedRequest)
 		)
 	);
 	const required_playlists = await Promise.all(
 		definition.required_playlist_ids.map((id: string) =>
-			getPlaylist(id, cached_request.makeRequest)
+			getPlaylist(id, cached_request.makeAuthorizedRequest)
 		)
 	);
 	return {
@@ -204,7 +204,7 @@ export const getTracksFromPlaylists = async (
 	playlists: Playlist[]
 ): Promise<Track[]> => {
 	const tracks = await Promise.all(
-		playlists.map((playlist) => getTracks(playlist.id, request_cacher.makeRequest))
+		playlists.map((playlist) => getTracks(playlist.id, request_cacher.makeAuthorizedRequest))
 	);
 	return tracks.flat();
 };

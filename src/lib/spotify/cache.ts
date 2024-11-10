@@ -4,7 +4,7 @@ export class RequestCacher {
 	private unresolved_cache: Map<string, Promise<any>> = new Map();
 	private resolved_cache: Map<string, any> = new Map();
 
-	makeRequest = async <T>(
+	makeAuthorizedRequest = async <T>(
 		url: string,
 		method: 'GET' | 'POST' | 'PUT' | 'DELETE',
 		handle_response: (response: Response) => Promise<T>,
