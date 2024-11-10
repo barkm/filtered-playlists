@@ -31,8 +31,8 @@ export interface Playlist {
 }
 
 export const getPlaylist = async (
-	make_request: MakeRequest,
-	playlist_id: string
+	playlist_id: string,
+	make_request: MakeRequest
 ): Promise<Playlist> => {
 	return await make_request(
 		`https://api.spotify.com/v1/playlists/${playlist_id}`,
@@ -133,8 +133,8 @@ export interface Track {
 }
 
 export const getTracks = async (
-	make_request: MakeRequest,
-	playlist_id: string
+	playlist_id: string,
+	make_request: MakeRequest
 ): Promise<Track[]> => {
 	let url: string | null = `https://api.spotify.com/v1/playlists/${playlist_id}/tracks`;
 	let tracks: Track[] = [];

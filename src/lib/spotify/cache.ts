@@ -27,10 +27,10 @@ export class RequestCacher {
 	};
 
 	getPlaylist = async (playlist_id: string): Promise<Playlist> => {
-		return await getPlaylist(this.makeRequest, playlist_id);
+		return await getPlaylist(playlist_id, this.makeRequest);
 	};
 
 	getTracks = async (playlist_id: string): Promise<Track[]> => {
-		return await getTracks(this.makeRequest, playlist_id);
+		return await getTracks(playlist_id, this.makeRequest);
 	};
 }
