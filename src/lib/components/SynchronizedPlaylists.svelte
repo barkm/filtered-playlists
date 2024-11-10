@@ -10,13 +10,14 @@
 	} from '$lib/synchronized';
 	import Loading from './Loading.svelte';
 	import { RequestCacher } from '$lib/spotify/cache';
+	import { authorizedRequest } from '$lib/spotify/authorization';
 
 	let synchronized_playlists: SynchronizedPlaylist[] | null = $state(null);
 	let playlists: Playlist[] | null = $state(null);
 
 	onMount(async () => {
 		playlists = await getPlaylists();
-		const request_cacher = new RequestCacher();
+		const request_cacher = new RequestCacher(authorizedRequest);
 		synchronized_playlists = await filterSychronizedPlaylists(
 			request_cacher.makeAuthorizedRequest,
 			playlists
@@ -25,7 +26,7 @@
 
 	const synchronize_all = async () => {
 		if (synchronized_playlists !== null) {
-			const request_cacher = new RequestCacher();
+			const request_cacher = new RequestCacher(authorizedRequest);
 			await Promise.all(
 				synchronized_playlists.map((p) => synchronize(p, request_cacher.makeAuthorizedRequest))
 			);

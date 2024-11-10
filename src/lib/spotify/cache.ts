@@ -1,8 +1,14 @@
 import { authorizedRequest } from './authorization';
+import type { MakeRequest } from './request';
 
 export class RequestCacher {
 	private unresolved_cache: Map<string, Promise<any>> = new Map();
 	private resolved_cache: Map<string, any> = new Map();
+	private make_request: MakeRequest;
+
+	constructor(make_request: MakeRequest) {
+		this.make_request = make_request;
+	}
 
 	makeAuthorizedRequest = async <T>(
 		url: string,
@@ -18,7 +24,7 @@ export class RequestCacher {
 		if (this.unresolved_cache.has(key)) {
 			return await this.unresolved_cache.get(key)!;
 		}
-		const unresolved_response = authorizedRequest(url, method, handle_response, content_type, body);
+		const unresolved_response = this.make_request(url, method, handle_response, content_type, body);
 		this.unresolved_cache.set(key, unresolved_response);
 		const response = await unresolved_response;
 		this.resolved_cache.set(key, response);
