@@ -49,6 +49,8 @@
 	onMount(() => {
 		type();
 	});
+
+	let creating = $state(false);
 </script>
 
 <inputrow>
@@ -57,12 +59,13 @@
 	</cover>
 	<input type="text" bind:value={playlist_name} {placeholder} />
 	<button
-		disabled={playlist_name === '' || included_playlists.length === 0}
+		disabled={creating || playlist_name === '' || included_playlists.length === 0}
 		onclick={async () => {
 			if (!canvas) {
 				console.log('no canvas');
 				return;
 			}
+			creating = true;
 			const synchronized_playlist = await createSynchronizedPlaylist(
 				canvas.toDataURL('image/jpeg'),
 				playlist_name,
@@ -76,6 +79,7 @@
 			included_playlists = [];
 			excluded_playlists = [];
 			required_playlists = [];
+			creating = false;
 		}}>create</button
 	>
 </inputrow>
