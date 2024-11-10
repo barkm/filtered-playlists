@@ -8,8 +8,8 @@ export interface User {
 	display_name: string;
 }
 
-export const getUser = async (): Promise<User> => {
-	return await authorizedRequest('https://api.spotify.com/v1/me', 'GET', handleGetUserResponse);
+export const getUser = async (make_request: MakeRequest = authorizedRequest): Promise<User> => {
+	return await make_request('https://api.spotify.com/v1/me', 'GET', handleGetUserResponse);
 };
 
 const handleGetUserResponse = async (response: Response): Promise<User> => {
@@ -49,15 +49,13 @@ const handleGetPlaylistResponse = async (response: Response): Promise<Playlist> 
 	return parsePlaylistFromItem(body);
 };
 
-export const getPlaylists = async (): Promise<Playlist[]> => {
+export const getPlaylists = async (
+	make_request: MakeRequest = authorizedRequest
+): Promise<Playlist[]> => {
 	let playlists: Playlist[] = [];
 	let url: string | null = 'https://api.spotify.com/v1/me/playlists';
 	while (url) {
-		const response: PlaylistsResponse = await authorizedRequest(
-			url,
-			'GET',
-			handleGetPlaylistsResponse
-		);
+		const response: PlaylistsResponse = await make_request(url, 'GET', handleGetPlaylistsResponse);
 		playlists = playlists.concat(response.playlists);
 		url = response.next;
 	}
@@ -88,10 +86,11 @@ const parsePlaylistFromItem = (item: any): Playlist => ({
 export const createPlaylist = async (
 	name: string,
 	is_public: boolean,
-	description: string
+	description: string,
+	make_request: MakeRequest = authorizedRequest
 ): Promise<Playlist> => {
 	const user = await getUser();
-	return await authorizedRequest(
+	return await make_request(
 		`https://api.spotify.com/v1/users/${user.id}/playlists`,
 		'POST',
 		handleCreatePlaylistResponse,
@@ -112,8 +111,11 @@ const handleCreatePlaylistResponse = async (response: Response): Promise<Playlis
 	return parsePlaylistFromItem(body);
 };
 
-export const unfollowPlaylist = async (playlist_id: string): Promise<void> => {
-	await authorizedRequest(
+export const unfollowPlaylist = async (
+	playlist_id: string,
+	make_request: MakeRequest = authorizedRequest
+): Promise<void> => {
+	await make_request(
 		`https://api.spotify.com/v1/playlists/${playlist_id}/followers`,
 		'DELETE',
 		handleUnfollowPlaylistResponse,
@@ -168,10 +170,14 @@ const handleGetTracksResponse = async (response: Response): Promise<GetTracksRes
 	};
 };
 
-export const addTracks = async (playlist_id: string, track_uris: string[]): Promise<void> => {
+export const addTracks = async (
+	playlist_id: string,
+	track_uris: string[],
+	make_request: MakeRequest = authorizedRequest
+): Promise<void> => {
 	const track_uris_chunks = chunkArray(track_uris, 100);
 	for (const chunk of track_uris_chunks) {
-		await addTracksChunk(playlist_id, chunk);
+		await addTracksChunk(playlist_id, chunk, make_request);
 	}
 };
 
@@ -183,8 +189,12 @@ const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
 	return result;
 };
 
-const addTracksChunk = async (playlist_id: string, track_uris: string[]): Promise<void> => {
-	const response = await authorizedRequest(
+const addTracksChunk = async (
+	playlist_id: string,
+	track_uris: string[],
+	make_request: MakeRequest = authorizedRequest
+): Promise<void> => {
+	await make_request(
 		`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
 		'POST',
 		handleAddTracksChunkResponse,
@@ -201,8 +211,12 @@ const handleAddTracksChunkResponse = async (response: Response): Promise<void> =
 	}
 };
 
-export const replaceTracks = async (playlist_id: string, track_uris: string[]): Promise<void> => {
-	await authorizedRequest(
+export const replaceTracks = async (
+	playlist_id: string,
+	track_uris: string[],
+	make_request: MakeRequest = authorizedRequest
+): Promise<void> => {
+	await make_request(
 		`https://api.spotify.com/v1/playlists/${playlist_id}/tracks`,
 		'PUT',
 		handleReplaceTracksResponse,
@@ -222,9 +236,10 @@ const handleReplaceTracksResponse = async (response: Response): Promise<void> =>
 
 export const addPlaylistCoverImage = async (
 	playlist_id: string,
-	image_data: string
+	image_data: string,
+	make_request: MakeRequest = authorizedRequest
 ): Promise<void> => {
-	await authorizedRequest(
+	await make_request(
 		`https://api.spotify.com/v1/playlists/${playlist_id}/images`,
 		'PUT',
 		handAddPlaylistCoverImageResponse,
@@ -246,9 +261,10 @@ export interface CoverImage {
 }
 
 export const getPlaylistCoverImage = async (
-	playlist_id: string
+	playlist_id: string,
+	make_request: MakeRequest = authorizedRequest
 ): Promise<CoverImage | undefined> => {
-	return await authorizedRequest(
+	return await make_request(
 		`https://api.spotify.com/v1/playlists/${playlist_id}/images`,
 		'GET',
 		handleGetPlaylistCoverImageResponse
