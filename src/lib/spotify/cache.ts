@@ -1,11 +1,10 @@
-import { getPlaylist, getPlaylists, getTracks, type Playlist, type Track } from './api';
 import { authorizedRequest } from './authorization';
 
 export class RequestCacher {
 	private unresolved_cache: Map<string, Promise<any>> = new Map();
 	private resolved_cache: Map<string, any> = new Map();
 
-	private makeRequest = async <T>(
+	makeRequest = async <T>(
 		url: string,
 		method: 'GET' | 'POST' | 'PUT' | 'DELETE',
 		handle_response: (response: Response) => Promise<T>,
@@ -24,13 +23,5 @@ export class RequestCacher {
 		const response = await unresolved_response;
 		this.resolved_cache.set(key, response);
 		return response;
-	};
-
-	getPlaylist = async (playlist_id: string): Promise<Playlist> => {
-		return await getPlaylist(playlist_id, this.makeRequest);
-	};
-
-	getTracks = async (playlist_id: string): Promise<Track[]> => {
-		return await getTracks(playlist_id, this.makeRequest);
 	};
 }

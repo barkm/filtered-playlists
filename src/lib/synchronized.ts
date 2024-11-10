@@ -4,7 +4,9 @@ import {
 	addPlaylistCoverImage,
 	addTracks,
 	createPlaylist,
+	getPlaylist,
 	getPlaylistCoverImage,
+	getTracks,
 	replaceTracks,
 	type Playlist,
 	type Track
@@ -129,13 +131,19 @@ const toSynchronizedPlaylist = async (
 	const comment = readJpegComment(dataUrl);
 	const definition = JSON.parse(comment.toString());
 	const included_playlists = await Promise.all(
-		definition.included_playlist_ids.map(cached_request.getPlaylist)
+		definition.included_playlist_ids.map((id: string) =>
+			getPlaylist(id, cached_request.makeRequest)
+		)
 	);
 	const excluded_playlists = await Promise.all(
-		definition.excluded_playlist_ids.map(cached_request.getPlaylist)
+		definition.excluded_playlist_ids.map((id: string) =>
+			getPlaylist(id, cached_request.makeRequest)
+		)
 	);
 	const required_playlists = await Promise.all(
-		definition.required_playlist_ids.map(cached_request.getPlaylist)
+		definition.required_playlist_ids.map((id: string) =>
+			getPlaylist(id, cached_request.makeRequest)
+		)
 	);
 	return {
 		playlist: playlist,
@@ -196,7 +204,7 @@ export const getTracksFromPlaylists = async (
 	playlists: Playlist[]
 ): Promise<Track[]> => {
 	const tracks = await Promise.all(
-		playlists.map((playlist) => request_cacher.getTracks(playlist.id))
+		playlists.map((playlist) => getTracks(playlist.id, request_cacher.makeRequest))
 	);
 	return tracks.flat();
 };
