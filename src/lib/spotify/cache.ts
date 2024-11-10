@@ -10,7 +10,7 @@ export class RequestCacher {
 		this.make_request = make_request;
 	}
 
-	makeAuthorizedRequest = async <T>(
+	makeRequest = async <T>(
 		url: string,
 		method: 'GET' | 'POST' | 'PUT' | 'DELETE',
 		handle_response: (response: Response) => Promise<T>,

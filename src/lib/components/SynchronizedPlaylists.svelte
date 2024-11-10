@@ -19,7 +19,7 @@
 		playlists = await getPlaylists();
 		const request_cacher = new RequestCacher(authorizedRequest);
 		synchronized_playlists = await filterSychronizedPlaylists(
-			request_cacher.makeAuthorizedRequest,
+			request_cacher.makeRequest,
 			playlists
 		);
 	});
@@ -28,7 +28,7 @@
 		if (synchronized_playlists !== null) {
 			const request_cacher = new RequestCacher(authorizedRequest);
 			await Promise.all(
-				synchronized_playlists.map((p) => synchronize(p, request_cacher.makeAuthorizedRequest))
+				synchronized_playlists.map((p) => synchronize(p, request_cacher.makeRequest))
 			);
 		}
 	};
