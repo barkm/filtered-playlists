@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Playlist } from '$lib/spotify/api';
+	import { RequestCacher } from '$lib/spotify/cache';
 	import { synchronize, type SynchronizedPlaylist } from '$lib/synchronized';
 
 	interface Props {
@@ -28,7 +29,9 @@
 		<button class="playlistname" onclick={() => (show_details = !show_details)}>
 			{synchronized_playlist.playlist.name}
 		</button>
-		<button class="click" onclick={() => synchronize(synchronized_playlist)}>sync</button>
+		<button class="click" onclick={() => synchronize(synchronized_playlist, new RequestCacher())}
+			>sync</button
+		>
 		<button class="click" onclick={onRemove}>x</button>
 	</main>
 
