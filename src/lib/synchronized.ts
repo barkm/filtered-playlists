@@ -11,7 +11,7 @@ import {
 	type Playlist,
 	type Track
 } from './spotify/api';
-import { RequestCacher } from './spotify/cache';
+import type { MakeRequest } from './spotify/request';
 
 export interface SynchronizedPlaylist {
 	playlist: Playlist;
@@ -22,6 +22,7 @@ export interface SynchronizedPlaylist {
 }
 
 export const createSynchronizedPlaylist = async (
+	make_request: MakeRequest,
 	cover_data: string,
 	name: string,
 	included_playlists: Playlist[],
@@ -53,8 +54,7 @@ export const createSynchronizedPlaylist = async (
 			await new Promise((resolve) => setTimeout(resolve, 500));
 		}
 	}
-	const request_cacher = new RequestCacher();
-	const tracks = await getAndFilterTracks(request_cacher, synchronized_playlist);
+	const tracks = await getAndFilterTracks(make_request, synchronized_playlist);
 	addTracks(
 		playlist.id,
 		tracks.map((track) => track.uri)
@@ -87,11 +87,11 @@ export const createSynchronizedPlaylist = async (
 };
 
 export const filterSychronizedPlaylists = async (
+	make_request: MakeRequest,
 	playlists: Playlist[]
 ): Promise<SynchronizedPlaylist[]> => {
 	const valid_playlists = await asyncFilter(playlists, isSynchronizedPlaylist);
-	const request_cacher = new RequestCacher();
-	return await Promise.all(valid_playlists.map((p) => toSynchronizedPlaylist(request_cacher, p)));
+	return await Promise.all(valid_playlists.map((p) => toSynchronizedPlaylist(make_request, p)));
 };
 
 const asyncFilter = async <T>(array: T[], filter: (x: T) => Promise<boolean>): Promise<T[]> => {
@@ -121,7 +121,7 @@ const isSynchronizedPlaylist = async (playlist: Playlist): Promise<boolean> => {
 };
 
 const toSynchronizedPlaylist = async (
-	cached_request: RequestCacher,
+	make_request: MakeRequest,
 	playlist: Playlist
 ): Promise<SynchronizedPlaylist> => {
 	if (!playlist.cover) {
@@ -131,19 +131,13 @@ const toSynchronizedPlaylist = async (
 	const comment = readJpegComment(dataUrl);
 	const definition = JSON.parse(comment.toString());
 	const included_playlists = await Promise.all(
-		definition.included_playlist_ids.map((id: string) =>
-			getPlaylist(id, cached_request.makeAuthorizedRequest)
-		)
+		definition.included_playlist_ids.map((id: string) => getPlaylist(id, make_request))
 	);
 	const excluded_playlists = await Promise.all(
-		definition.excluded_playlist_ids.map((id: string) =>
-			getPlaylist(id, cached_request.makeAuthorizedRequest)
-		)
+		definition.excluded_playlist_ids.map((id: string) => getPlaylist(id, make_request))
 	);
 	const required_playlists = await Promise.all(
-		definition.required_playlist_ids.map((id: string) =>
-			getPlaylist(id, cached_request.makeAuthorizedRequest)
-		)
+		definition.required_playlist_ids.map((id: string) => getPlaylist(id, make_request))
 	);
 	return {
 		playlist: playlist,
@@ -156,10 +150,10 @@ const toSynchronizedPlaylist = async (
 
 export const synchronize = async (
 	synchronized_playlist: SynchronizedPlaylist,
-	request_cacher: RequestCacher
+	make_request: MakeRequest
 ): Promise<void> => {
 	synchronized_playlist.synchronizing = true;
-	const tracks = await getAndFilterTracks(request_cacher, synchronized_playlist);
+	const tracks = await getAndFilterTracks(make_request, synchronized_playlist);
 	replaceTracks(
 		synchronized_playlist.playlist.id,
 		tracks.map((track) => track.uri)
@@ -168,19 +162,19 @@ export const synchronize = async (
 };
 
 const getAndFilterTracks = async (
-	request_cacher: RequestCacher,
+	make_request: MakeRequest,
 	synchronized_playlist: SynchronizedPlaylist
 ): Promise<Track[]> => {
 	const included_tracks = await getTracksFromPlaylists(
-		request_cacher,
+		make_request,
 		synchronized_playlist.included_playlists
 	);
 	const excluded_tracks = await getTracksFromPlaylists(
-		request_cacher,
+		make_request,
 		synchronized_playlist.excluded_playlists
 	);
 	const required_tracks = await getTracksFromPlaylists(
-		request_cacher,
+		make_request,
 		synchronized_playlist.required_playlists
 	);
 	return filterTracks(included_tracks, excluded_tracks, required_tracks);
@@ -200,11 +194,11 @@ export const filterTracks = (
 };
 
 export const getTracksFromPlaylists = async (
-	request_cacher: RequestCacher,
+	make_request: MakeRequest,
 	playlists: Playlist[]
 ): Promise<Track[]> => {
 	const tracks = await Promise.all(
-		playlists.map((playlist) => getTracks(playlist.id, request_cacher.makeAuthorizedRequest))
+		playlists.map((playlist) => getTracks(playlist.id, make_request))
 	);
 	return tracks.flat();
 };

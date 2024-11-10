@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Playlist } from '$lib/spotify/api';
-	import { RequestCacher } from '$lib/spotify/cache';
+	import { authorizedRequest } from '$lib/spotify/authorization';
 	import { synchronize, type SynchronizedPlaylist } from '$lib/synchronized';
 	import RandomSquare from './RandomSquare.svelte';
 
@@ -37,7 +37,7 @@
 		<button
 			class="click"
 			disabled={synchronized_playlist.synchronizing}
-			onclick={() => synchronize(synchronized_playlist, new RequestCacher())}>sync</button
+			onclick={() => synchronize(synchronized_playlist, authorizedRequest)}>sync</button
 		>
 		<button class="click" disabled={synchronized_playlist.synchronizing} onclick={onRemove}
 			>x</button

@@ -16,13 +16,19 @@
 
 	onMount(async () => {
 		playlists = await getPlaylists();
-		synchronized_playlists = await filterSychronizedPlaylists(playlists);
+		const request_cacher = new RequestCacher();
+		synchronized_playlists = await filterSychronizedPlaylists(
+			request_cacher.makeAuthorizedRequest,
+			playlists
+		);
 	});
 
 	const synchronize_all = async () => {
 		if (synchronized_playlists !== null) {
 			const request_cacher = new RequestCacher();
-			await Promise.all(synchronized_playlists.map((p) => synchronize(p, request_cacher)));
+			await Promise.all(
+				synchronized_playlists.map((p) => synchronize(p, request_cacher.makeAuthorizedRequest))
+			);
 		}
 	};
 </script>

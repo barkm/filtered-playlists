@@ -5,7 +5,7 @@
 	import PlaylistDropdown from './PlaylistDropdown.svelte';
 	import PlaylistPrivacy from './PlaylistPrivacy.svelte';
 	import RandomSquare from './RandomSquare.svelte';
-	import { getScopes } from '$lib/spotify/authorization';
+	import { authorizedRequest, getScopes } from '$lib/spotify/authorization';
 
 	interface Props {
 		playlists: Playlist[];
@@ -67,6 +67,7 @@
 			}
 			creating = true;
 			const synchronized_playlist = await createSynchronizedPlaylist(
+				authorizedRequest,
 				canvas.toDataURL('image/jpeg'),
 				playlist_name,
 				included_playlists,
