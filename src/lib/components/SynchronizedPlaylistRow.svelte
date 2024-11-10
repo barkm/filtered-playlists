@@ -2,6 +2,7 @@
 	import type { Playlist } from '$lib/spotify/api';
 	import { RequestCacher } from '$lib/spotify/cache';
 	import { synchronize, type SynchronizedPlaylist } from '$lib/synchronized';
+	import RandomSquare from './RandomSquare.svelte';
 
 	interface Props {
 		synchronized_playlist: SynchronizedPlaylist;
@@ -24,15 +25,23 @@
 <container>
 	<main>
 		<a href={synchronized_playlist.playlist.spotify_url} target="_blank">
-			<img src={synchronized_playlist.playlist.cover?.url} alt="cover" />
+			{#if synchronized_playlist.synchronizing}
+				<RandomSquare update_ms={200} --height="100%" />
+			{:else}
+				<img src={synchronized_playlist.playlist.cover?.url} alt="cover" />
+			{/if}
 		</a>
 		<button class="playlistname" onclick={() => (show_details = !show_details)}>
 			{synchronized_playlist.playlist.name}
 		</button>
-		<button class="click" onclick={() => synchronize(synchronized_playlist, new RequestCacher())}
-			>sync</button
+		<button
+			class="click"
+			disabled={synchronized_playlist.synchronizing}
+			onclick={() => synchronize(synchronized_playlist, new RequestCacher())}>sync</button
 		>
-		<button class="click" onclick={onRemove}>x</button>
+		<button class="click" disabled={synchronized_playlist.synchronizing} onclick={onRemove}
+			>x</button
+		>
 	</main>
 
 	{#if show_details}
