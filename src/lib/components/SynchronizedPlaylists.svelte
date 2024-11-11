@@ -14,6 +14,7 @@
 
 	let synchronized_playlists: SynchronizedPlaylist[] | null = $state(null);
 	let playlists: Playlist[] | null = $state(null);
+	let disable_synchronization = $state(false);
 
 	onMount(async () => {
 		playlists = await getPlaylists();
@@ -26,10 +27,12 @@
 
 	const synchronize_all = async () => {
 		if (synchronized_playlists !== null) {
+			disable_synchronization = true;
 			const request_cacher = new RequestCacher(authorizedRequest);
 			await Promise.all(
 				synchronized_playlists.map((p) => synchronize(p, request_cacher.makeRequest))
 			);
+			disable_synchronization = false;
 		}
 	};
 </script>
@@ -37,7 +40,7 @@
 {#if synchronized_playlists === null || playlists === null}
 	<Loading />
 {:else}
-	<button onclick={synchronize_all}>synchronize all</button>
+	<button onclick={synchronize_all} disabled={disable_synchronization}>synchronize all</button>
 	<CreateSynchronizedPlaylist {playlists} bind:synchronized_playlists />
 	<SynchronizedPlaylists {synchronized_playlists} />
 {/if}
