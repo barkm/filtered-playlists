@@ -6,6 +6,7 @@
 	import PlaylistPrivacy from './PlaylistPrivacy.svelte';
 	import RandomSquare from './RandomSquare.svelte';
 	import { authorizedRequest, getScopes } from '$lib/spotify/authorization';
+	import TracksInformation from './TracksInformation.svelte';
 
 	interface Props {
 		playlists: Playlist[];
@@ -106,6 +107,8 @@
 			bind:selected_playlists={required_playlists}
 		/>
 	</filters>
+
+	<TracksInformation {included_playlists} {excluded_playlists} {required_playlists} />
 {/if}
 
 <style>
