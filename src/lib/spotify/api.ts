@@ -130,8 +130,10 @@ const handleUnfollowPlaylistResponse = async (response: Response): Promise<void>
 };
 
 export interface Track {
+	id: string;
 	uri: string;
 	name: string;
+	duration_ms: number;
 }
 
 export const getTracks = async (
@@ -160,8 +162,10 @@ const handleGetTracksResponse = async (response: Response): Promise<GetTracksRes
 	const body = await response.json();
 	const tracks: Track[] = body.items.map(
 		(item: any): Track => ({
+			id: item.track.id,
 			uri: item.track.uri,
-			name: item.track.name
+			name: item.track.name,
+			duration_ms: item.track.duration_ms
 		})
 	);
 	return {
