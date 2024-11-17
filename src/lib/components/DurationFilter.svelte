@@ -10,6 +10,7 @@
 		required_playlists: Playlist[];
 		duration_limits?: { min: number; max: number };
 	}
+	import { ms_to_min_sec } from '$lib/duration';
 
 	let {
 		included_playlists,
@@ -30,13 +31,6 @@
 		]);
 		return filterTracks(included, excluded, required);
 	});
-
-	const ms_to_min_sec = (ms: number): string => {
-		let total_seconds = ms / 1000;
-		let minutes = Math.floor(total_seconds / 60);
-		let seconds = Math.floor(total_seconds % 60);
-		return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-	};
 
 	let durations = $derived.by(async () => {
 		let tracks_resolved = await tracks;
