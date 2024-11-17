@@ -1,3 +1,4 @@
+import type { DurationLimits } from './duration';
 import { readJpegComment, writeJpegComment, removeDataUrlPrefix } from './jpeg/comment';
 import { fetchImageData } from './jpeg/download';
 import {
@@ -18,7 +19,7 @@ export interface SynchronizedPlaylist {
 	included_playlists: Playlist[];
 	excluded_playlists: Playlist[];
 	required_playlists: Playlist[];
-	duration_limits?: { min: number; max: number };
+	duration_limits: DurationLimits;
 	synchronizing: boolean;
 }
 
@@ -30,7 +31,7 @@ export const createSynchronizedPlaylist = async (
 	excluded_playlists: Playlist[],
 	required_playlists: Playlist[],
 	is_public: boolean,
-	duration_limits?: { min: number; max: number }
+	duration_limits: DurationLimits
 ): Promise<SynchronizedPlaylist> => {
 	const playlist = await createPlaylist(name, is_public, '');
 	const synchronized_playlist: SynchronizedPlaylist = {
@@ -144,6 +145,13 @@ const toSynchronizedPlaylist = async (
 	const required_playlists = await Promise.all(
 		definition.required_playlist_ids.map((id: string) => getPlaylist(id, make_request))
 	);
+	let duration_limits = { min: 0, max: Infinity };
+	if ('duration_limits' in definition) {
+		duration_limits = {
+			min: definition.duration_limits.min,
+			max: definition.duration_limits.max === null ? Infinity : definition.duration_limits.max
+		};
+	}
 	return {
 		playlist: playlist,
 		included_playlists: included_playlists,
@@ -195,14 +203,12 @@ export const filterTracks = (
 	included_tracks: Track[],
 	excluded_tracks: Track[],
 	required_tracks: Track[],
-	duration_limits?: { min: number; max: number }
+	duration_limits: { min: number; max: number }
 ): Track[] => {
 	let tracks = removeDuplicates(included_tracks, (track) => track.uri);
-	if (duration_limits !== undefined) {
-		tracks = tracks.filter((track) => {
-			return track.duration_ms >= duration_limits.min && track.duration_ms <= duration_limits.max;
-		});
-	}
+	tracks = tracks.filter((track) => {
+		return track.duration_ms >= duration_limits.min && track.duration_ms <= duration_limits.max;
+	});
 	tracks = difference(tracks, excluded_tracks, (track) => track.uri);
 	if (required_tracks.length > 0) {
 		tracks = intersection(tracks, required_tracks, (track) => track.uri);

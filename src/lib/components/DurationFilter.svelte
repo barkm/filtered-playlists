@@ -3,14 +3,14 @@
 	import { authorizedRequest } from '$lib/spotify/authorization';
 	import { filterTracks, getTracksFromPlaylists } from '$lib/synchronized';
 	import RangeSlider from 'svelte-range-slider-pips';
+	import { ms_to_min_sec, type DurationLimits } from '$lib/duration';
 
 	interface Props {
 		included_playlists: Playlist[];
 		excluded_playlists: Playlist[];
 		required_playlists: Playlist[];
-		duration_limits?: { min: number; max: number };
+		duration_limits: DurationLimits;
 	}
-	import { ms_to_min_sec } from '$lib/duration';
 
 	let {
 		included_playlists,
@@ -29,7 +29,7 @@
 			excluded_tracks,
 			required_tracks
 		]);
-		return filterTracks(included, excluded, required);
+		return filterTracks(included, excluded, required, { min: 0, max: Infinity });
 	});
 
 	let durations = $derived.by(async () => {
@@ -66,13 +66,11 @@
 						range
 						hoverable={false}
 						formatter={(ms) => {
-							if (duration_limits === undefined) {
-								if (ms === durations.min) {
-									return '-inf';
-								}
-								if (ms === durations.max) {
-									return '+inf';
-								}
+							if (ms === durations.min) {
+								return '0:00';
+							}
+							if (ms === durations.max) {
+								return '+inf';
 							}
 							return ms_to_min_sec(ms);
 						}}
@@ -82,13 +80,9 @@
 						springValues={{ stiffness: 1, damping: 1 }}
 						on:change={(e) => {
 							const new_values = e.detail.values;
-							if (new_values[0] === durations.min && new_values[1] === durations.max) {
-								duration_limits = undefined;
-								return;
-							}
 							duration_limits = {
-								min: e.detail.values[0],
-								max: e.detail.values[1]
+								min: new_values[0] === durations.min ? 0 : new_values[0],
+								max: new_values[1] === durations.max ? Infinity : new_values[1]
 							};
 						}}
 					/>

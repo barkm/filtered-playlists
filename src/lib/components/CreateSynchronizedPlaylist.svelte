@@ -52,7 +52,7 @@
 	});
 
 	let creating = $state(false);
-	let duration_limits = $state(undefined);
+	let duration_limits = $state({ min: 0, max: Infinity });
 </script>
 
 <inputrow>
