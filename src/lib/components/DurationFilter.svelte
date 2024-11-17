@@ -71,12 +71,27 @@
 						float
 						range
 						hoverable={false}
-						formatter={ms_to_min_sec}
+						formatter={(ms) => {
+							if (duration_limits === undefined) {
+								if (ms === durations.min) {
+									return '-inf';
+								}
+								if (ms === durations.max) {
+									return '+inf';
+								}
+							}
+							return ms_to_min_sec(ms);
+						}}
 						min={durations.min}
 						max={durations.max}
 						values={[durations.min, durations.max]}
 						springValues={{ stiffness: 1, damping: 1 }}
 						on:change={(e) => {
+							const new_values = e.detail.values;
+							if (new_values[0] === durations.min && new_values[1] === durations.max) {
+								duration_limits = undefined;
+								return;
+							}
 							duration_limits = {
 								min: e.detail.values[0],
 								max: e.detail.values[1]
