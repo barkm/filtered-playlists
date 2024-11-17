@@ -18,6 +18,7 @@ export interface SynchronizedPlaylist {
 	included_playlists: Playlist[];
 	excluded_playlists: Playlist[];
 	required_playlists: Playlist[];
+	duration_limits?: { min: number; max: number };
 	synchronizing: boolean;
 }
 
@@ -28,20 +29,23 @@ export const createSynchronizedPlaylist = async (
 	included_playlists: Playlist[],
 	excluded_playlists: Playlist[],
 	required_playlists: Playlist[],
-	is_public: boolean
+	is_public: boolean,
+	duration_limits?: { min: number; max: number }
 ): Promise<SynchronizedPlaylist> => {
 	const playlist = await createPlaylist(name, is_public, '');
-	const synchronized_playlist = {
+	const synchronized_playlist: SynchronizedPlaylist = {
 		playlist: playlist,
 		included_playlists: included_playlists,
 		excluded_playlists: excluded_playlists,
 		required_playlists: required_playlists,
+		duration_limits: duration_limits,
 		synchronizing: false
 	};
 	const definition = {
 		included_playlist_ids: included_playlists.map((playlist) => playlist.id),
 		excluded_playlist_ids: excluded_playlists.map((playlist) => playlist.id),
-		required_playlist_ids: required_playlists.map((playlist) => playlist.id)
+		required_playlist_ids: required_playlists.map((playlist) => playlist.id),
+		duration_limits: duration_limits
 	};
 	const cover = writeJpegComment(cover_data, JSON.stringify(definition));
 	const cover_base64 = removeDataUrlPrefix(cover);
@@ -82,6 +86,7 @@ export const createSynchronizedPlaylist = async (
 		included_playlists: included_playlists,
 		excluded_playlists: excluded_playlists,
 		required_playlists: required_playlists,
+		duration_limits: duration_limits,
 		synchronizing: false
 	};
 };
@@ -144,6 +149,7 @@ const toSynchronizedPlaylist = async (
 		included_playlists: included_playlists,
 		excluded_playlists: excluded_playlists,
 		required_playlists: required_playlists,
+		duration_limits: 'duration_limits' in definition ? definition.duration_limits : undefined,
 		synchronizing: false
 	};
 };
@@ -177,15 +183,26 @@ const getAndFilterTracks = async (
 		make_request,
 		synchronized_playlist.required_playlists
 	);
-	return filterTracks(included_tracks, excluded_tracks, required_tracks);
+	return filterTracks(
+		included_tracks,
+		excluded_tracks,
+		required_tracks,
+		synchronized_playlist.duration_limits
+	);
 };
 
 export const filterTracks = (
 	included_tracks: Track[],
 	excluded_tracks: Track[],
-	required_tracks: Track[]
+	required_tracks: Track[],
+	duration_limits?: { min: number; max: number }
 ): Track[] => {
 	let tracks = removeDuplicates(included_tracks, (track) => track.uri);
+	if (duration_limits !== undefined) {
+		tracks = tracks.filter((track) => {
+			return track.duration_ms >= duration_limits.min && track.duration_ms <= duration_limits.max;
+		});
+	}
 	tracks = difference(tracks, excluded_tracks, (track) => track.uri);
 	if (required_tracks.length > 0) {
 		tracks = intersection(tracks, required_tracks, (track) => track.uri);

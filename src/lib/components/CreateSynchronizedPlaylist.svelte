@@ -6,7 +6,7 @@
 	import PlaylistPrivacy from './PlaylistPrivacy.svelte';
 	import RandomSquare from './RandomSquare.svelte';
 	import { authorizedRequest, getScopes } from '$lib/spotify/authorization';
-	import TracksInformation from './TracksInformation.svelte';
+	import DurationFilter from './DurationFilter.svelte';
 
 	interface Props {
 		playlists: Playlist[];
@@ -52,6 +52,7 @@
 	});
 
 	let creating = $state(false);
+	let duration_limits = $state(undefined);
 </script>
 
 <inputrow>
@@ -74,7 +75,8 @@
 				included_playlists,
 				excluded_playlists,
 				required_playlists,
-				is_public
+				is_public,
+				duration_limits
 			);
 			synchronized_playlists = [synchronized_playlist, ...synchronized_playlists];
 			playlist_name = '';
@@ -108,7 +110,12 @@
 		/>
 	</filters>
 
-	<TracksInformation {included_playlists} {excluded_playlists} {required_playlists} />
+	<DurationFilter
+		{included_playlists}
+		{excluded_playlists}
+		{required_playlists}
+		bind:duration_limits
+	/>
 {/if}
 
 <style>

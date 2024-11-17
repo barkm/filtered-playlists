@@ -19,6 +19,17 @@
 	const excluded_playlist_names = concat_playlist_names(synchronized_playlist.excluded_playlists);
 	const required_playlist_names = concat_playlist_names(synchronized_playlist.required_playlists);
 
+	const ms_to_min_sec = (ms: number): string => {
+		let total_seconds = ms / 1000;
+		let minutes = Math.floor(total_seconds / 60);
+		let seconds = Math.floor(total_seconds % 60);
+		return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+	};
+
+	const duration_limits = synchronized_playlist.duration_limits
+		? `durations: ${ms_to_min_sec(synchronized_playlist.duration_limits.min)} - ${ms_to_min_sec(synchronized_playlist.duration_limits.max)}`
+		: '';
+
 	let show_details = $state(false);
 </script>
 
@@ -59,6 +70,11 @@
 			{#if required_playlist_names !== ''}
 				<div>
 					required: {required_playlist_names}
+				</div>
+			{/if}
+			{#if duration_limits !== ''}
+				<div>
+					{duration_limits}
 				</div>
 			{/if}
 		</playlistdetails>
