@@ -7,7 +7,7 @@
 		synchronized_playlists: SynchronizedPlaylist[];
 	}
 
-	let { synchronized_playlists }: Props = $props();
+	let { synchronized_playlists = $bindable() }: Props = $props();
 </script>
 
 {#if synchronized_playlists.length}
@@ -17,7 +17,8 @@
 			onRemove={() => {
 				unfollowPlaylist(synchronized_playlist.playlist.id);
 				synchronized_playlists = synchronized_playlists.filter(
-					(playlist) => playlist !== synchronized_playlist
+					(playlist: SynchronizedPlaylist) =>
+						playlist.playlist.id !== synchronized_playlist.playlist.id
 				);
 			}}
 		/>

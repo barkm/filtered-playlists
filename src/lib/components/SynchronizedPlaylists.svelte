@@ -44,5 +44,5 @@
 		<button onclick={synchronize_all} disabled={disable_synchronization}>synchronize all</button>
 	{/if}
 	<CreateSynchronizedPlaylist {playlists} bind:synchronized_playlists />
-	<SynchronizedPlaylists {synchronized_playlists} />
+	<SynchronizedPlaylists bind:synchronized_playlists />
 {/if}
