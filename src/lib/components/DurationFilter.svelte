@@ -61,10 +61,10 @@
 </script>
 
 <container>
-	{#await durations}
-		<p>Loading...</p>
-	{:then durations}
-		{#if included_playlists.length !== 0}
+	{#if included_playlists.length !== 0}
+		{#await durations}
+			<p>Loading...</p>
+		{:then durations}
 			duration
 			<range-slider>
 				<RangeSlider
@@ -97,7 +97,7 @@
 					}}
 				/>
 			</range-slider>
-		{/if}
+		{/await}
 		<filtered-tracks>
 			{#if filtered_tracks !== undefined}
 				{#if filtered_tracks.length === 0}
@@ -107,7 +107,7 @@
 				{/if}
 			{/if}
 		</filtered-tracks>
-	{/await}
+	{/if}
 </container>
 
 <style>
