@@ -23,14 +23,16 @@
 	let excluded_tracks = $derived(getTracksFromPlaylists(authorizedRequest, excluded_playlists));
 	let required_tracks = $derived(getTracksFromPlaylists(authorizedRequest, required_playlists));
 
-	let tracks = $derived.by(async () => {
+	const get_tracks = async (limits: DurationLimits) => {
 		let [included, excluded, required] = await Promise.all([
 			included_tracks,
 			excluded_tracks,
 			required_tracks
 		]);
-		return filterTracks(included, excluded, required, { min: 0, max: Infinity });
-	});
+		return filterTracks(included, excluded, required, limits);
+	};
+
+	let tracks = $derived.by(async () => get_tracks({ min: 0, max: Infinity }));
 
 	let durations = $derived.by(async () => {
 		let tracks_resolved = await tracks;
@@ -48,47 +50,63 @@
 			max: max_duration
 		};
 	});
+
+	let filtered_tracks: Track[] | undefined = $state(undefined);
+
+	$effect(() => {
+		get_tracks({ min: 0, max: Infinity }).then((t) => {
+			filtered_tracks = t;
+		});
+	});
 </script>
 
 <container>
-	{#await Promise.all([tracks, durations])}
+	{#await durations}
 		<p>Loading...</p>
-	{:then [tracks, durations]}
+	{:then durations}
 		{#if included_playlists.length !== 0}
-			{#if tracks.length === 0}
-				<p>No tracks found</p>
-			{:else}
-				duration
-				<range-slider>
-					<RangeSlider
-						id="always"
-						float
-						range
-						hoverable={false}
-						formatter={(ms) => {
-							if (ms === durations.min) {
-								return '0:00';
-							}
-							if (ms === durations.max) {
-								return '+inf';
-							}
-							return ms_to_min_sec(ms);
-						}}
-						min={durations.min}
-						max={durations.max}
-						values={[durations.min, durations.max]}
-						springValues={{ stiffness: 1, damping: 1 }}
-						on:change={(e) => {
-							const new_values = e.detail.values;
-							duration_limits = {
-								min: new_values[0] === durations.min ? 0 : new_values[0],
-								max: new_values[1] === durations.max ? Infinity : new_values[1]
-							};
-						}}
-					/>
-				</range-slider>
-			{/if}
+			duration
+			<range-slider>
+				<RangeSlider
+					id="always"
+					float
+					range
+					hoverable={false}
+					formatter={(ms) => {
+						if (ms === durations.min) {
+							return '0:00';
+						}
+						if (ms === durations.max) {
+							return '+inf';
+						}
+						return ms_to_min_sec(ms);
+					}}
+					min={durations.min}
+					max={durations.max}
+					values={[durations.min, durations.max]}
+					springValues={{ stiffness: 1, damping: 1 }}
+					on:change={(e) => {
+						const new_values = e.detail.values;
+						duration_limits = {
+							min: new_values[0] === durations.min ? 0 : new_values[0],
+							max: new_values[1] === durations.max ? Infinity : new_values[1]
+						};
+						get_tracks(duration_limits).then((t) => {
+							filtered_tracks = t;
+						});
+					}}
+				/>
+			</range-slider>
 		{/if}
+		<filtered-tracks>
+			{#if filtered_tracks !== undefined}
+				{#if filtered_tracks.length === 0}
+					<p>No tracks</p>
+				{:else}
+					<p>{filtered_tracks.length} tracks found</p>
+				{/if}
+			{/if}
+		</filtered-tracks>
 	{/await}
 </container>
 
@@ -98,7 +116,6 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		margin-bottom: 2em;
 	}
 
 	range-slider {
@@ -139,5 +156,9 @@
 		--range-handle-inactive: #000000; /* inactive handle color */
 		--range-handle: #ffffff; /* non-focussed handle color */
 		--range-handle-focus: #000000; /* focussed handle color */
+	}
+
+	filtered-tracks {
+		margin-top: 2em;
 	}
 </style>
