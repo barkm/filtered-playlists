@@ -74,10 +74,10 @@
 					hoverable={false}
 					formatter={(ms) => {
 						if (ms === durations.min) {
-							return '0:00';
+							return '00:00';
 						}
 						if (ms === durations.max) {
-							return '+inf';
+							return '&nbsp;inf&nbsp;';
 						}
 						return ms_to_min_sec(ms);
 					}}
@@ -146,7 +146,7 @@
 		transition: none;
 		background: transparent;
 		top: 50%;
-		transform: translate(-1.65em, -50%);
+		transform: translate(-2em, -50%);
 		color: #000000;
 		font-size: 1em;
 	}
