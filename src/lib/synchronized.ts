@@ -157,7 +157,7 @@ const toSynchronizedPlaylist = async (
 		included_playlists: included_playlists,
 		excluded_playlists: excluded_playlists,
 		required_playlists: required_playlists,
-		duration_limits: 'duration_limits' in definition ? definition.duration_limits : undefined,
+		duration_limits: duration_limits,
 		synchronizing: false
 	};
 };
