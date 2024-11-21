@@ -2,9 +2,13 @@
 	import { getUser, NoAccessError, type User } from '$lib/spotify/api';
 	import { onMount } from 'svelte';
 	import SynchronizedPlaylists from './SynchronizedPlaylists.svelte';
-	import { logout } from '$lib/spotify/authorization';
-	import { is_logged_in } from '$lib/store';
 	import NoAccess from './NoAccess.svelte';
+
+	interface Props {
+		logout: () => void;
+	}
+
+	let { logout }: Props = $props();
 
 	let has_access = $state(true);
 	let user: User | null = $state(null);
@@ -20,11 +24,6 @@
 			}
 		}
 	});
-
-	const logoutAndReset = () => {
-		logout();
-		$is_logged_in = false;
-	};
 </script>
 
 <div class="container">
@@ -36,7 +35,7 @@
 		{/if}
 	</div>
 	<div class="footer">
-		<button onclick={logoutAndReset}>log out</button>
+		<button onclick={logout}>log out</button>
 		{#if user !== null}
 			<div>signed in as {user.display_name}</div>
 		{/if}

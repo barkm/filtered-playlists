@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { login } from '$lib/spotify/authorization';
-	import { onMount } from 'svelte';
+	import { login, logout } from '$lib/spotify/authorization';
 	import Main from './Main.svelte';
-	import { is_logged_in } from '$lib/store';
 	import { isLoggedIn } from '$lib/spotify/authorization';
 	import PermissionsSelector from './MultiSelector.svelte';
 
 	const default_scopes = ['ugc-image-upload'];
+
+	let is_logged_in = $state(isLoggedIn());
 
 	let permissions = $state([
 		{
@@ -32,9 +32,10 @@
 
 	let login_enabled = $derived(scopes.filter((p) => p.includes('modify')).length > 0);
 
-	onMount(async () => {
-		$is_logged_in = await isLoggedIn();
-	});
+	const logoutAndReset = () => {
+		logout();
+		is_logged_in = Promise.resolve(false);
+	};
 </script>
 
 {#snippet label(data: string)}
@@ -42,19 +43,21 @@
 {/snippet}
 
 <page>
-	{#if $is_logged_in}
-		<Main />
-	{:else}
-		<login>
-			<p>allow access to</p>
-			<PermissionsSelector {label} bind:selections={permissions}></PermissionsSelector>
-			<login-button>
-				<button onclick={() => login(scopes)} disabled={!login_enabled}>
-					<login-text> log in </login-text>
-				</button>
-			</login-button>
-		</login>
-	{/if}
+	{#await is_logged_in then is_logged_in}
+		{#if is_logged_in}
+			<Main logout={logoutAndReset} />
+		{:else}
+			<login>
+				<p>allow access to</p>
+				<PermissionsSelector {label} bind:selections={permissions}></PermissionsSelector>
+				<login-button>
+					<button onclick={() => login(scopes)} disabled={!login_enabled}>
+						<login-text> log in </login-text>
+					</button>
+				</login-button>
+			</login>
+		{/if}
+	{/await}
 </page>
 
 <style>
