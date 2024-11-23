@@ -21,8 +21,8 @@
 	const excluded_playlist_names = concat_playlist_names(synchronized_playlist.excluded_playlists);
 	const required_playlist_names = concat_playlist_names(synchronized_playlist.required_playlists);
 
-	const get_duration_limit_str = (duration_limits?: DurationLimits) => {
-		if (!duration_limits) {
+	const get_duration_limit_str = (duration_limits: DurationLimits) => {
+		if (duration_limits.min === 0 && duration_limits.max === Infinity) {
 			return '';
 		}
 		const min = ms_to_min_sec(duration_limits.min);
