@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { login, logout } from '$lib/spotify/authorization';
 	import Main from './Main.svelte';
-	import { isLoggedIn } from '$lib/spotify/authorization';
 	import PermissionsSelector from './MultiSelector.svelte';
+	import { is_logged_in, logged_in_guard } from '$lib/login';
+	import { onMount } from 'svelte';
+	import { getUser } from '$lib/spotify/api';
 
 	const default_scopes = ['ugc-image-upload'];
-
-	let is_logged_in = $state(isLoggedIn());
 
 	let permissions = $state([
 		{
@@ -34,8 +34,14 @@
 
 	const logoutAndReset = () => {
 		logout();
-		is_logged_in = Promise.resolve(false);
+		$is_logged_in = Promise.resolve(false);
 	};
+
+	onMount(
+		logged_in_guard(async () => {
+			await getUser();
+		})
+	);
 </script>
 
 {#snippet label(data: string)}
@@ -43,7 +49,7 @@
 {/snippet}
 
 <page>
-	{#await is_logged_in then is_logged_in}
+	{#await $is_logged_in then is_logged_in}
 		{#if is_logged_in}
 			<Main logout={logoutAndReset} />
 		{:else}

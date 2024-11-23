@@ -9,6 +9,7 @@
 		onRemove: () => void;
 	}
 	import { ms_to_min_sec, type DurationLimits } from '$lib/duration';
+	import { logged_in_guard } from '$lib/login';
 
 	let { synchronized_playlist, onRemove }: Props = $props();
 
@@ -49,7 +50,8 @@
 		<button
 			class="click"
 			disabled={synchronized_playlist.synchronizing}
-			onclick={() => synchronize(synchronized_playlist, authorizedRequest)}>sync</button
+			onclick={logged_in_guard(() => synchronize(synchronized_playlist, authorizedRequest))}
+			>sync</button
 		>
 		<button class="click" disabled={synchronized_playlist.synchronizing} onclick={onRemove}
 			>x</button

@@ -7,6 +7,7 @@
 	import RandomSquare from './RandomSquare.svelte';
 	import { authorizedRequest, getScopes } from '$lib/spotify/authorization';
 	import DurationFilter from './DurationFilter.svelte';
+	import { logged_in_guard } from '$lib/login';
 
 	interface Props {
 		playlists: Playlist[];
@@ -62,7 +63,7 @@
 	<input type="text" bind:value={playlist_name} {placeholder} />
 	<button
 		disabled={creating || playlist_name === '' || included_playlists.length === 0}
-		onclick={async () => {
+		onclick={logged_in_guard(async () => {
 			if (!canvas) {
 				console.log('no canvas');
 				return;
@@ -84,7 +85,7 @@
 			excluded_playlists = [];
 			required_playlists = [];
 			creating = false;
-		}}>create</button
+		})}>create</button
 	>
 </inputrow>
 

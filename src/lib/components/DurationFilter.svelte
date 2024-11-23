@@ -4,6 +4,7 @@
 	import { filterTracks, getTracksFromPlaylists } from '$lib/synchronized';
 	import RangeSlider from 'svelte-range-slider-pips';
 	import { ms_to_min_sec, type DurationLimits } from '$lib/duration';
+	import { logged_in_guard } from '$lib/login';
 
 	interface Props {
 		included_playlists: Playlist[];
@@ -19,9 +20,15 @@
 		duration_limits = $bindable()
 	}: Props = $props();
 
-	let included_tracks = $derived(getTracksFromPlaylists(authorizedRequest, included_playlists));
-	let excluded_tracks = $derived(getTracksFromPlaylists(authorizedRequest, excluded_playlists));
-	let required_tracks = $derived(getTracksFromPlaylists(authorizedRequest, required_playlists));
+	let included_tracks = $derived(
+		logged_in_guard(getTracksFromPlaylists)(authorizedRequest, included_playlists)
+	);
+	let excluded_tracks = $derived(
+		logged_in_guard(getTracksFromPlaylists)(authorizedRequest, excluded_playlists)
+	);
+	let required_tracks = $derived(
+		logged_in_guard(getTracksFromPlaylists)(authorizedRequest, required_playlists)
+	);
 
 	const get_tracks = async (limits: DurationLimits) => {
 		let [included, excluded, required] = await Promise.all([
@@ -29,6 +36,9 @@
 			excluded_tracks,
 			required_tracks
 		]);
+		if (included === undefined || excluded === undefined || required === undefined) {
+			return [];
+		}
 		return filterTracks(included, excluded, required, limits);
 	};
 

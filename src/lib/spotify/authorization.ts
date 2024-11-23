@@ -79,6 +79,12 @@ export const isLoggedIn = async (): Promise<boolean> => {
 	return (await getAccessToken()) !== null;
 };
 
+export class AuthorizationError extends Error {
+	constructor(message: string) {
+		super(message);
+	}
+}
+
 export const authorizedRequest: MakeRequest = async <T>(
 	url: string,
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE',
@@ -88,7 +94,7 @@ export const authorizedRequest: MakeRequest = async <T>(
 ): Promise<T> => {
 	const access_token = await getAccessToken();
 	if (!access_token) {
-		throw new Error('No access token');
+		throw new AuthorizationError('no access token');
 	}
 	let headers: { Authorization: string; 'Content-Type'?: string } = {
 		Authorization: `Bearer ${access_token}`
