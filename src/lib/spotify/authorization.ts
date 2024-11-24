@@ -185,6 +185,9 @@ const base64Encode = (input: ArrayBuffer) => {
 
 const refreshAccessToken = async () => {
 	const refresh_token = fromLocalStorage('refresh_token') as string;
+	if (!refresh_token) {
+		throw new Error('No refresh token');
+	}
 	const url = 'https://accounts.spotify.com/api/token';
 	const payload = {
 		method: 'POST',
@@ -197,10 +200,13 @@ const refreshAccessToken = async () => {
 			client_id: CONFIG.client_id
 		})
 	};
-	const body = await fetch(url, payload);
-	const response = await body.json();
-	const expires_at = Date.now() + 1000 * response.expires_in;
-	toLocalStorage('access_token', response.access_token);
+	const response = await fetch(url, payload);
+	if (response.status != 200) {
+		throw new Error('Failed to refresh access token');
+	}
+	const body = await response.json();
+	const expires_at = Date.now() + 1000 * body.expires_in;
+	toLocalStorage('access_token', body.access_token);
 	toLocalStorage('expires_at', expires_at.toString());
-	toLocalStorage('refresh_token', response.refresh_token);
+	toLocalStorage('refresh_token', body.refresh_token);
 };
