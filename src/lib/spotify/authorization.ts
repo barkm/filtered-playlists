@@ -113,17 +113,10 @@ export const authorizedRequest: MakeRequest = async <T>(
 const getAccessToken = async (): Promise<string | null> => {
 	const access_token = fromLocalStorage('access_token');
 	const expires_at = fromLocalStorage('expires_at');
-	if (!access_token) {
-		return null;
+	if (access_token && expires_at && Date.now() < Number(expires_at)) {
+		return access_token;
 	}
-	if (!expires_at) {
-		return null;
-	}
-	if (Date.now() > Number(expires_at)) {
-		await refreshAccessToken();
-		return getAccessToken();
-	}
-	return access_token;
+	return await refreshAccessToken();
 };
 
 export const getScopes = (): string[] => {
@@ -183,10 +176,10 @@ const base64Encode = (input: ArrayBuffer) => {
 		.replace(/\//g, '_');
 };
 
-const refreshAccessToken = async () => {
+const refreshAccessToken = async (): Promise<string | null> => {
 	const refresh_token = fromLocalStorage('refresh_token') as string;
 	if (!refresh_token) {
-		throw new Error('No refresh token');
+		return null;
 	}
 	const url = 'https://accounts.spotify.com/api/token';
 	const payload = {
@@ -202,11 +195,12 @@ const refreshAccessToken = async () => {
 	};
 	const response = await fetch(url, payload);
 	if (response.status != 200) {
-		throw new Error('Failed to refresh access token');
+		return null;
 	}
 	const body = await response.json();
 	const expires_at = Date.now() + 1000 * body.expires_in;
 	toLocalStorage('access_token', body.access_token);
 	toLocalStorage('expires_at', expires_at.toString());
 	toLocalStorage('refresh_token', body.refresh_token);
+	return body.access_token;
 };
