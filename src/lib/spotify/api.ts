@@ -72,7 +72,10 @@ const handleGetPlaylistsResponse = async (response: Response): Promise<Playlists
 		throw new Error('Failed to fetch playlists');
 	}
 	const body = await response.json();
-	return { playlists: body.items.map(parsePlaylistFromItem), next: body.next };
+	return {
+		playlists: body.items.filter((i: any) => i !== null).map(parsePlaylistFromItem),
+		next: body.next
+	};
 };
 
 const parsePlaylistFromItem = (item: any): Playlist => ({
