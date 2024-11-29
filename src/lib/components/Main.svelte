@@ -2,7 +2,7 @@
 	import { getUser, NoAccessError, type User } from '$lib/spotify/api';
 	import { onMount } from 'svelte';
 	import SynchronizedPlaylists from './SynchronizedPlaylists.svelte';
-	import NoAccess from './NoAccess.svelte';
+	import ErrorPage from './ErrorPage.svelte';
 
 	interface Props {
 		logout: () => void;
@@ -29,7 +29,7 @@
 <div class="container">
 	<div class="content">
 		{#if !has_access}
-			<NoAccess />
+			<ErrorPage error_message={"sorry! you don't have access to this page."} />
 		{:else if user !== null}
 			<SynchronizedPlaylists />
 		{/if}

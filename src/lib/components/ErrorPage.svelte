@@ -1,10 +1,15 @@
-<script>
+<script lang="ts">
 	import { BW_PALETTE } from '$lib/jpeg/generate';
 	import RandomSquare from './RandomSquare.svelte';
+
+	interface Props {
+		error_message: string;
+	}
+
+	let { error_message }: Props = $props();
 </script>
 
 <container>
-	<p>Sorry! You don't have access to this page!</p>
 	<RandomSquare
 		palette={BW_PALETTE}
 		update_ms={1000}
@@ -14,6 +19,7 @@
 		--width="5em"
 		--max-width="300px"
 	/>
+	<p>{error_message}</p>
 </container>
 
 <style>
@@ -26,5 +32,9 @@
 		height: 100%;
 		font-size: 1em;
 		flex-grow: 1;
+	}
+
+	p {
+		margin-top: 2em;
 	}
 </style>
