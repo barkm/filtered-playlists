@@ -1,6 +1,5 @@
 import { writable } from 'svelte/store';
 import { AuthorizationError, isLoggedIn, logout } from './spotify/authorization';
-import { base } from '$app/paths';
 
 export const is_logged_in = writable(isLoggedIn());
 
