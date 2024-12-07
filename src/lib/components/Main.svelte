@@ -24,12 +24,20 @@
 			}
 		}
 	});
+
+	const request_access = async () => {
+		window.location.href =
+			'https://docs.google.com/forms/d/e/1FAIpQLSe2DO8xLsp-SnE43HEGVMVgL2EpIgOGP6VwGFPrPrTfF_vgkA/viewform?usp=header';
+	};
 </script>
 
 <div class="container">
 	<div class="content">
 		{#if !has_access}
-			<ErrorPage error_message={"sorry! you don't have access to this page."} />
+			<no-access-error>
+				<ErrorPage error_message={"sorry! you don't have access to this page."} />
+				<button onclick={request_access}>request access</button>
+			</no-access-error>
 		{:else if user !== null}
 			<SynchronizedPlaylists />
 		{/if}
@@ -72,5 +80,17 @@
 	.footer div {
 		margin-top: 0.5em;
 		font-size: 0.8em;
+	}
+
+	no-access-error {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		flex-grow: 1;
+	}
+
+	no-access-error button {
+		margin-top: 1em;
 	}
 </style>

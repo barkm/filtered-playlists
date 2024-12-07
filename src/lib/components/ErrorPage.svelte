@@ -31,7 +31,6 @@
 		width: 100%;
 		height: 100%;
 		font-size: 1em;
-		flex-grow: 1;
 	}
 
 	p {
