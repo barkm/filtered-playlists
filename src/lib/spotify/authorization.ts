@@ -85,6 +85,12 @@ export class AuthorizationError extends Error {
 	}
 }
 
+export class RateLimitError extends Error {
+	constructor(message: string) {
+		super(message);
+	}
+}
+
 export const authorizedRequest: MakeRequest = async <T>(
 	url: string,
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE',
@@ -107,6 +113,15 @@ export const authorizedRequest: MakeRequest = async <T>(
 		headers: headers,
 		body: body
 	});
+	if (response.status == 429) {
+		const retry_after = Number(response.headers.get('Retry-After'));
+		if (retry_after && retry_after < 60) {
+			await new Promise((resolve) => setTimeout(resolve, retry_after * 1000));
+			return await authorizedRequest(url, method, handle_response, content_type, body);
+		} else {
+			throw new RateLimitError('Rate limit exceeded');
+		}
+	}
 	return await handle_response(response);
 };
 
