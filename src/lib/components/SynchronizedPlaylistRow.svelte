@@ -8,7 +8,7 @@
 		synchronized_playlist: SynchronizedPlaylist;
 		onRemove: () => void;
 	}
-	import { ms_to_min_sec, type DurationLimits } from '$lib/duration';
+	import { ms_to_min_sec, type Limits } from '$lib/duration';
 	import { logged_in_guard } from '$lib/login';
 
 	let { synchronized_playlist, onRemove }: Props = $props();
@@ -21,7 +21,7 @@
 	const excluded_playlist_names = concat_playlist_names(synchronized_playlist.excluded_playlists);
 	const required_playlist_names = concat_playlist_names(synchronized_playlist.required_playlists);
 
-	const get_duration_limit_str = (duration_limits: DurationLimits) => {
+	const get_duration_limit_str = (duration_limits: Limits) => {
 		if (duration_limits.min === 0 && duration_limits.max === Infinity) {
 			return '';
 		}
@@ -30,7 +30,7 @@
 		return `durations: ${min} - ${max}`;
 	};
 
-	const get_release_year_limit_str = (release_year_limits: DurationLimits) => {
+	const get_release_year_limit_str = (release_year_limits: Limits) => {
 		if (release_year_limits.min === -Infinity && release_year_limits.max === Infinity) {
 			return '';
 		}

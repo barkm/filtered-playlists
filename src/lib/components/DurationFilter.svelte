@@ -3,15 +3,15 @@
 	import { authorizedRequest } from '$lib/spotify/authorization';
 	import { filterTracks, getTracksFromPlaylists } from '$lib/synchronized';
 	import RangeSlider from 'svelte-range-slider-pips';
-	import { ms_to_min_sec, type DurationLimits } from '$lib/duration';
+	import { ms_to_min_sec, type Limits } from '$lib/duration';
 	import { logged_in_guard } from '$lib/login';
 
 	interface Props {
 		included_playlists: Playlist[];
 		excluded_playlists: Playlist[];
 		required_playlists: Playlist[];
-		duration_limits: DurationLimits;
-		release_year_limits: DurationLimits;
+		duration_limits: Limits;
+		release_year_limits: Limits;
 	}
 
 	let {
@@ -32,7 +32,7 @@
 		logged_in_guard(getTracksFromPlaylists)(authorizedRequest, required_playlists)
 	);
 
-	const get_tracks = async (limits: DurationLimits, release_year_limits: DurationLimits) => {
+	const get_tracks = async (limits: Limits, release_year_limits: Limits) => {
 		let [included, excluded, required] = await Promise.all([
 			included_tracks,
 			excluded_tracks,

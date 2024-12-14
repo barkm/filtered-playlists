@@ -1,4 +1,4 @@
-export interface DurationLimits {
+export interface Limits {
 	min: number;
 	max: number;
 }

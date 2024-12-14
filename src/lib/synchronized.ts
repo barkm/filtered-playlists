@@ -1,4 +1,4 @@
-import type { DurationLimits } from './duration';
+import type { Limits } from './duration';
 import { readJpegComment, writeJpegComment, removeDataUrlPrefix } from './jpeg/comment';
 import { fetchImageData } from './jpeg/download';
 import {
@@ -19,8 +19,8 @@ export interface SynchronizedPlaylist {
 	included_playlists: Playlist[];
 	excluded_playlists: Playlist[];
 	required_playlists: Playlist[];
-	duration_limits: DurationLimits;
-	release_year_limits: DurationLimits;
+	duration_limits: Limits;
+	release_year_limits: Limits;
 	synchronizing: boolean;
 }
 
@@ -32,8 +32,8 @@ export const createSynchronizedPlaylist = async (
 	excluded_playlists: Playlist[],
 	required_playlists: Playlist[],
 	is_public: boolean,
-	duration_limits: DurationLimits,
-	release_year_limits: DurationLimits
+	duration_limits: Limits,
+	release_year_limits: Limits
 ): Promise<SynchronizedPlaylist> => {
 	const playlist = await createPlaylist(name, is_public, '');
 	const synchronized_playlist: SynchronizedPlaylist = {
