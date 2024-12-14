@@ -128,7 +128,7 @@
 					}}
 				/>
 			</range-slider>
-			release_year
+			release year
 			<range-slider>
 				<RangeSlider
 					id="always"
