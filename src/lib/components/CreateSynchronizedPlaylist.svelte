@@ -54,6 +54,7 @@
 
 	let creating = $state(false);
 	let duration_limits = $state({ min: 0, max: Infinity });
+	let release_year_limits = $state({ min: -Infinity, max: Infinity });
 </script>
 
 <inputrow>
@@ -77,7 +78,8 @@
 				excluded_playlists,
 				required_playlists,
 				is_public,
-				duration_limits
+				duration_limits,
+				release_year_limits
 			);
 			synchronized_playlists = [synchronized_playlist, ...synchronized_playlists];
 			playlist_name = '';
@@ -116,6 +118,7 @@
 		{excluded_playlists}
 		{required_playlists}
 		bind:duration_limits
+		bind:release_year_limits
 	/>
 {/if}
 

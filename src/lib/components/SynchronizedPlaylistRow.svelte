@@ -26,11 +26,21 @@
 			return '';
 		}
 		const min = ms_to_min_sec(duration_limits.min);
-		const max = duration_limits.max === Infinity ? 'inf' : ms_to_min_sec(duration_limits.max);
+		const max = duration_limits.max === Infinity ? '+inf' : ms_to_min_sec(duration_limits.max);
 		return `durations: ${min} - ${max}`;
 	};
 
+	const get_release_year_limit_str = (release_year_limits: DurationLimits) => {
+		if (release_year_limits.min === -Infinity && release_year_limits.max === Infinity) {
+			return '';
+		}
+		const min = release_year_limits.min === -Infinity ? '-inf' : release_year_limits.min;
+		const max = release_year_limits.max === Infinity ? '+inf' : release_year_limits.max;
+		return `release years: ${min} - ${max}`;
+	};
+
 	const duration_limits = get_duration_limit_str(synchronized_playlist.duration_limits);
+	const release_year_limits = get_release_year_limit_str(synchronized_playlist.release_year_limits);
 
 	let show_details = $state(false);
 </script>
@@ -78,6 +88,11 @@
 			{#if duration_limits !== ''}
 				<div>
 					{duration_limits}
+				</div>
+			{/if}
+			{#if release_year_limits !== ''}
+				<div>
+					{release_year_limits}
 				</div>
 			{/if}
 		</playlistdetails>

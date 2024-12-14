@@ -11,13 +11,15 @@
 		excluded_playlists: Playlist[];
 		required_playlists: Playlist[];
 		duration_limits: DurationLimits;
+		release_year_limits: DurationLimits;
 	}
 
 	let {
 		included_playlists,
 		excluded_playlists,
 		required_playlists,
-		duration_limits = $bindable()
+		duration_limits = $bindable(),
+		release_year_limits = $bindable()
 	}: Props = $props();
 
 	let included_tracks = $derived(
@@ -30,7 +32,7 @@
 		logged_in_guard(getTracksFromPlaylists)(authorizedRequest, required_playlists)
 	);
 
-	const get_tracks = async (limits: DurationLimits) => {
+	const get_tracks = async (limits: DurationLimits, release_year_limits: DurationLimits) => {
 		let [included, excluded, required] = await Promise.all([
 			included_tracks,
 			excluded_tracks,
@@ -39,10 +41,12 @@
 		if (included === undefined || excluded === undefined || required === undefined) {
 			return [];
 		}
-		return filterTracks(included, excluded, required, limits);
+		return filterTracks(included, excluded, required, limits, release_year_limits);
 	};
 
-	let tracks = $derived.by(async () => get_tracks({ min: 0, max: Infinity }));
+	let tracks = $derived.by(async () =>
+		get_tracks({ min: 0, max: Infinity }, { min: -Infinity, max: Infinity })
+	);
 
 	let durations = $derived.by(async () => {
 		let tracks_resolved = await tracks;
@@ -61,10 +65,27 @@
 		};
 	});
 
+	let release_years = $derived.by(async () => {
+		let tracks_resolved = await tracks;
+		if (tracks_resolved.length === 0) {
+			return {
+				min: 0,
+				max: 0
+			};
+		}
+		let release_years = tracks_resolved.map((t) => t.album.release_year);
+		let min_release_year = Math.min(...release_years);
+		let max_release_year = Math.max(...release_years);
+		return {
+			min: min_release_year,
+			max: max_release_year
+		};
+	});
+
 	let filtered_tracks: Track[] | undefined = $state(undefined);
 
 	$effect(() => {
-		get_tracks({ min: 0, max: Infinity }).then((t) => {
+		get_tracks({ min: 0, max: Infinity }, { min: -Infinity, max: Infinity }).then((t) => {
 			filtered_tracks = t;
 		});
 	});
@@ -72,9 +93,9 @@
 
 <container>
 	{#if included_playlists.length !== 0}
-		{#await durations}
+		{#await Promise.all([durations, release_years])}
 			<p>Loading...</p>
-		{:then durations}
+		{:then [durations, release_years]}
 			duration
 			<range-slider>
 				<RangeSlider
@@ -87,7 +108,7 @@
 							return '00:00';
 						}
 						if (ms === durations.max) {
-							return '&nbsp;inf&nbsp;';
+							return '+inf&nbsp;';
 						}
 						return ms_to_min_sec(ms);
 					}}
@@ -101,7 +122,39 @@
 							min: new_values[0] === durations.min ? 0 : new_values[0],
 							max: new_values[1] === durations.max ? Infinity : new_values[1]
 						};
-						get_tracks(duration_limits).then((t) => {
+						get_tracks(duration_limits, release_year_limits).then((t) => {
+							filtered_tracks = t;
+						});
+					}}
+				/>
+			</range-slider>
+			release_year
+			<range-slider>
+				<RangeSlider
+					id="always"
+					float
+					range
+					hoverable={false}
+					formatter={(year) => {
+						if (year === release_years.min) {
+							return '-inf';
+						}
+						if (year === release_years.max) {
+							return '+inf';
+						}
+						return year.toString();
+					}}
+					min={release_years.min}
+					max={release_years.max}
+					values={[release_year_limits.min, release_year_limits.max]}
+					springValues={{ stiffness: 1, damping: 1 }}
+					on:change={(e) => {
+						const new_values = e.detail.values;
+						release_year_limits = {
+							min: new_values[0] === release_years.min ? -Infinity : new_values[0],
+							max: new_values[1] === release_years.max ? Infinity : new_values[1]
+						};
+						get_tracks(duration_limits, release_year_limits).then((t) => {
 							filtered_tracks = t;
 						});
 					}}
@@ -131,6 +184,7 @@
 	range-slider {
 		width: 100%;
 		margin-top: 0.5em;
+		margin-bottom: 1em;
 	}
 
 	:global(#always.rangeSlider) {
