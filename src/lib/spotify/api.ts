@@ -132,11 +132,16 @@ const handleUnfollowPlaylistResponse = async (response: Response): Promise<void>
 	}
 };
 
+export interface Album {
+	release_year: number;
+}
+
 export interface Track {
 	id: string;
 	uri: string;
 	name: string;
 	duration_ms: number;
+	album: Album;
 }
 
 export const getTracks = async (
@@ -168,7 +173,10 @@ const handleGetTracksResponse = async (response: Response): Promise<GetTracksRes
 			id: item.track.id,
 			uri: item.track.uri,
 			name: item.track.name,
-			duration_ms: item.track.duration_ms
+			duration_ms: item.track.duration_ms,
+			album: {
+				release_year: parseInt(item.track.album.release_date.split('-')[0])
+			}
 		})
 	);
 	return {
