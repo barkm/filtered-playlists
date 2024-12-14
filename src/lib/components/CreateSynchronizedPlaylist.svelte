@@ -6,7 +6,7 @@
 	import PlaylistPrivacy from './PlaylistPrivacy.svelte';
 	import RandomSquare from './RandomSquare.svelte';
 	import { authorizedRequest, getScopes } from '$lib/spotify/authorization';
-	import DurationFilter from './DurationFilter.svelte';
+	import TracksFilter from './TracksFilter.svelte';
 	import { logged_in_guard } from '$lib/login';
 
 	interface Props {
@@ -113,7 +113,7 @@
 		/>
 	</filters>
 
-	<DurationFilter
+	<TracksFilter
 		{included_playlists}
 		{excluded_playlists}
 		{required_playlists}
