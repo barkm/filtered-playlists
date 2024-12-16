@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { type Playlist, type Track } from '$lib/spotify/api';
+	import { type Artist, type Playlist, type Track } from '$lib/spotify/api';
 	import { authorizedRequest } from '$lib/spotify/authorization';
 	import { filterTracks, getTracksFromPlaylists } from '$lib/synchronized';
 	import RangeSlider from 'svelte-range-slider-pips';
 	import { ms_to_min_sec, type Limits } from '$lib/duration';
 	import { logged_in_guard } from '$lib/login';
+	import DropDown from './DropDown.svelte';
 
 	interface Props {
 		included_playlists: Playlist[];
@@ -12,6 +13,7 @@
 		required_playlists: Playlist[];
 		duration_limits: Limits;
 		release_year_limits: Limits;
+		required_artists: Artist[];
 	}
 
 	let {
@@ -19,7 +21,8 @@
 		excluded_playlists,
 		required_playlists,
 		duration_limits = $bindable(),
-		release_year_limits = $bindable()
+		release_year_limits = $bindable(),
+		required_artists = $bindable()
 	}: Props = $props();
 
 	let included_tracks = $derived(
@@ -82,6 +85,16 @@
 		};
 	});
 
+	let artists = $derived.by(async () => {
+		let tracks_resolved = await tracks;
+		if (tracks_resolved.length === 0) {
+			return [];
+		}
+		let artists = tracks_resolved.map((t) => t.artists).flat();
+		artists = [...new Set(artists)];
+		return artists;
+	});
+
 	let filtered_tracks: Track[] | undefined = $state(undefined);
 
 	$effect(() => {
@@ -93,9 +106,16 @@
 
 <container>
 	{#if included_playlists.length !== 0}
-		{#await Promise.all([durations, release_years])}
+		{#await Promise.all([artists, durations, release_years])}
 			<p>Loading...</p>
-		{:then [durations, release_years]}
+		{:then [artists, durations, release_years]}
+			<artists>
+				<DropDown placeholder="artists" options={artists} bind:selected={required_artists}>
+					{#snippet option_snippet(artist: Artist)}
+						{artist.name}
+					{/snippet}
+				</DropDown>
+			</artists>
 			duration
 			<range-slider>
 				<RangeSlider
@@ -175,14 +195,18 @@
 
 <style>
 	container {
-		width: 60%;
+		width: 100%;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 	}
 
-	range-slider {
+	artists {
 		width: 100%;
+	}
+
+	range-slider {
+		width: 60%;
 		margin-top: 0.5em;
 		margin-bottom: 1em;
 	}

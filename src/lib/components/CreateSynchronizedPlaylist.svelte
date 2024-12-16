@@ -55,6 +55,7 @@
 	let creating = $state(false);
 	let duration_limits = $state({ min: 0, max: Infinity });
 	let release_year_limits = $state({ min: -Infinity, max: Infinity });
+	let required_artists = $state([]);
 </script>
 
 <inputrow>
@@ -119,6 +120,7 @@
 		{required_playlists}
 		bind:duration_limits
 		bind:release_year_limits
+		bind:required_artists
 	/>
 {/if}
 
