@@ -136,12 +136,18 @@ export interface Album {
 	release_year: number;
 }
 
+export interface Artist {
+	id: string;
+	name: string;
+}
+
 export interface Track {
 	id: string;
 	uri: string;
 	name: string;
 	duration_ms: number;
 	album: Album;
+	artists: Artist[];
 }
 
 export const getTracks = async (
@@ -176,7 +182,8 @@ const handleGetTracksResponse = async (response: Response): Promise<GetTracksRes
 			duration_ms: item.track.duration_ms,
 			album: {
 				release_year: parseInt(item.track.album.release_date.split('-')[0])
-			}
+			},
+			artists: item.track.artists.map(parseArtist)
 		})
 	);
 	return {
@@ -184,6 +191,11 @@ const handleGetTracksResponse = async (response: Response): Promise<GetTracksRes
 		next: body.next
 	};
 };
+
+const parseArtist = (artist: any): Artist => ({
+	id: artist.id,
+	name: artist.name
+});
 
 export const addTracks = async (
 	playlist_id: string,
