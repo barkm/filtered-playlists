@@ -129,7 +129,15 @@
 			<p>Loading...</p>
 		{:then [artists, durations, release_years]}
 			<artists>
-				<ArtistsDropDown {artists} bind:selected_artists={required_artists} />
+				<ArtistsDropDown
+					{artists}
+					bind:selected_artists={required_artists}
+					on_change={() => {
+						get_tracks(duration_limits, release_year_limits, required_artists).then((t) => {
+							filtered_tracks = t;
+						});
+					}}
+				/>
 			</artists>
 			duration
 			<range-slider>
