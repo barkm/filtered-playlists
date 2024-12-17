@@ -322,11 +322,17 @@ export const getArtists = async (
 	artist_ids: string[],
 	make_request: MakeRequest
 ): Promise<Artist[]> => {
-	return await make_request(
-		`https://api.spotify.com/v1/artists?ids=${artist_ids.join(',')}`,
-		'GET',
-		handleGetArtistResponse
+	const lists_of_artist_ids = chunkArray(artist_ids, 50);
+	const artists_responses = await Promise.all(
+		lists_of_artist_ids.map((artist_ids) =>
+			make_request(
+				`https://api.spotify.com/v1/artists?ids=${artist_ids.join(',')}`,
+				'GET',
+				handleGetArtistResponse
+			)
+		)
 	);
+	return artists_responses.flat();
 };
 
 const handleGetArtistResponse = async (response: Response): Promise<Artist[]> => {
