@@ -139,6 +139,7 @@ export interface Album {
 export interface Artist {
 	id: string;
 	name: string;
+	cover_url?: string;
 }
 
 export interface Track {
@@ -194,7 +195,8 @@ const handleGetTracksResponse = async (response: Response): Promise<GetTracksRes
 
 const parseArtist = (artist: any): Artist => ({
 	id: artist.id,
-	name: artist.name
+	name: artist.name,
+	cover_url: artist.images?.length > 0 ? artist.images[artist.images.length - 1].url : null
 });
 
 export const addTracks = async (
