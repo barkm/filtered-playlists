@@ -198,16 +198,16 @@
 					}}
 				/>
 			</range-slider>
-		{/await}
-		<filtered-tracks>
-			{#if filtered_tracks !== undefined}
-				{#if filtered_tracks.length === 0}
-					<p>No tracks</p>
-				{:else}
-					<p>{filtered_tracks.length} tracks found</p>
+			<filtered-tracks>
+				{#if filtered_tracks !== undefined}
+					{#if filtered_tracks.length === 0}
+						<p>No tracks</p>
+					{:else}
+						<p>{filtered_tracks.length} tracks found</p>
+					{/if}
 				{/if}
-			{/if}
-		</filtered-tracks>
+			</filtered-tracks>
+		{/await}
 	{/if}
 </container>
 
