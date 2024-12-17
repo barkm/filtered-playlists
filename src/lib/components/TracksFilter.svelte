@@ -90,9 +90,16 @@
 		if (tracks_resolved.length === 0) {
 			return [];
 		}
-		let artists = tracks_resolved.map((t) => t.artists).flat();
-		artists = [...new Set(artists)];
-		return artists;
+		let all_artists = tracks_resolved.map((t) => t.artists).flat();
+		let unique_artist_ids = new Set();
+		let unique_artists: Artist[] = [];
+		for (let artist of all_artists) {
+			if (!unique_artist_ids.has(artist.id)) {
+				unique_artist_ids.add(artist.id);
+				unique_artists.push(artist);
+			}
+		}
+		return unique_artists.sort((a, b) => a.name.localeCompare(b.name));
 	});
 
 	let filtered_tracks: Track[] | undefined = $state(undefined);
