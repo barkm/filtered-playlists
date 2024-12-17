@@ -6,6 +6,7 @@
 	import { ms_to_min_sec, type Limits } from '$lib/duration';
 	import { logged_in_guard } from '$lib/login';
 	import DropDown from './DropDown.svelte';
+	import ArtistsDropDown from './ArtistsDropDown.svelte';
 
 	interface Props {
 		included_playlists: Playlist[];
@@ -128,11 +129,7 @@
 			<p>Loading...</p>
 		{:then [artists, durations, release_years]}
 			<artists>
-				<DropDown placeholder="artists" options={artists} bind:selected={required_artists}>
-					{#snippet option_snippet(artist: Artist)}
-						{artist.name}
-					{/snippet}
-				</DropDown>
+				<ArtistsDropDown {artists} bind:selected_artists={required_artists} />
 			</artists>
 			duration
 			<range-slider>
