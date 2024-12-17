@@ -315,3 +315,22 @@ const handleGetPlaylistCoverImageResponse = async (
 		height: image.height
 	};
 };
+
+export const getArtists = async (
+	artist_ids: string[],
+	make_request: MakeRequest
+): Promise<Artist[]> => {
+	return await make_request(
+		`https://api.spotify.com/v1/artists?ids=${artist_ids.join(',')}`,
+		'GET',
+		handleGetArtistResponse
+	);
+};
+
+const handleGetArtistResponse = async (response: Response): Promise<Artist[]> => {
+	if (response.status != 200) {
+		throw new Error('Failed to fetch artists');
+	}
+	const body = await response.json();
+	return body.artists.map(parseArtist);
+};
