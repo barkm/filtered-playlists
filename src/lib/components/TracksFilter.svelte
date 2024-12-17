@@ -35,7 +35,11 @@
 		logged_in_guard(getTracksFromPlaylists)(authorizedRequest, required_playlists)
 	);
 
-	const get_tracks = async (limits: Limits, release_year_limits: Limits) => {
+	const get_tracks = async (
+		limits: Limits,
+		release_year_limits: Limits,
+		required_artists: Artist[]
+	) => {
 		let [included, excluded, required] = await Promise.all([
 			included_tracks,
 			excluded_tracks,
@@ -44,11 +48,18 @@
 		if (included === undefined || excluded === undefined || required === undefined) {
 			return [];
 		}
-		return filterTracks(included, excluded, required, limits, release_year_limits);
+		return filterTracks(
+			included,
+			excluded,
+			required,
+			limits,
+			release_year_limits,
+			required_artists
+		);
 	};
 
 	let tracks = $derived.by(async () =>
-		get_tracks({ min: 0, max: Infinity }, { min: -Infinity, max: Infinity })
+		get_tracks({ min: 0, max: Infinity }, { min: -Infinity, max: Infinity }, [])
 	);
 
 	let durations = $derived.by(async () => {
@@ -105,7 +116,7 @@
 	let filtered_tracks: Track[] | undefined = $state(undefined);
 
 	$effect(() => {
-		get_tracks({ min: 0, max: Infinity }, { min: -Infinity, max: Infinity }).then((t) => {
+		get_tracks({ min: 0, max: Infinity }, { min: -Infinity, max: Infinity }, []).then((t) => {
 			filtered_tracks = t;
 		});
 	});
@@ -149,7 +160,7 @@
 							min: new_values[0] === durations.min ? 0 : new_values[0],
 							max: new_values[1] === durations.max ? Infinity : new_values[1]
 						};
-						get_tracks(duration_limits, release_year_limits).then((t) => {
+						get_tracks(duration_limits, release_year_limits, required_artists).then((t) => {
 							filtered_tracks = t;
 						});
 					}}
@@ -181,7 +192,7 @@
 							min: new_values[0] === release_years.min ? -Infinity : new_values[0],
 							max: new_values[1] === release_years.max ? Infinity : new_values[1]
 						};
-						get_tracks(duration_limits, release_year_limits).then((t) => {
+						get_tracks(duration_limits, release_year_limits, required_artists).then((t) => {
 							filtered_tracks = t;
 						});
 					}}

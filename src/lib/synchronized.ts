@@ -5,10 +5,12 @@ import {
 	addPlaylistCoverImage,
 	addTracks,
 	createPlaylist,
+	getArtists,
 	getPlaylist,
 	getPlaylistCoverImage,
 	getTracks,
 	replaceTracks,
+	type Artist,
 	type Playlist,
 	type Track
 } from './spotify/api';
@@ -21,6 +23,7 @@ export interface SynchronizedPlaylist {
 	required_playlists: Playlist[];
 	duration_limits: Limits;
 	release_year_limits: Limits;
+	required_artists: Artist[];
 	synchronizing: boolean;
 }
 
@@ -33,7 +36,8 @@ export const createSynchronizedPlaylist = async (
 	required_playlists: Playlist[],
 	is_public: boolean,
 	duration_limits: Limits,
-	release_year_limits: Limits
+	release_year_limits: Limits,
+	required_artists: Artist[]
 ): Promise<SynchronizedPlaylist> => {
 	const playlist = await createPlaylist(name, is_public, '');
 	const synchronized_playlist: SynchronizedPlaylist = {
@@ -43,6 +47,7 @@ export const createSynchronizedPlaylist = async (
 		required_playlists: required_playlists,
 		duration_limits: duration_limits,
 		release_year_limits: release_year_limits,
+		required_artists: required_artists,
 		synchronizing: false
 	};
 	const definition = {
@@ -50,7 +55,8 @@ export const createSynchronizedPlaylist = async (
 		excluded_playlist_ids: excluded_playlists.map((playlist) => playlist.id),
 		required_playlist_ids: required_playlists.map((playlist) => playlist.id),
 		duration_limits: duration_limits,
-		release_year_limits: release_year_limits
+		release_year_limits: release_year_limits,
+		required_artist_ids: required_artists.map((artist) => artist.id)
 	};
 	const cover = writeJpegComment(cover_data, JSON.stringify(definition));
 	const cover_base64 = removeDataUrlPrefix(cover);
@@ -93,6 +99,7 @@ export const createSynchronizedPlaylist = async (
 		required_playlists: required_playlists,
 		duration_limits: duration_limits,
 		release_year_limits: release_year_limits,
+		required_artists: required_artists,
 		synchronizing: false
 	};
 };
@@ -168,6 +175,10 @@ const toSynchronizedPlaylist = async (
 				definition.release_year_limits.max === null ? Infinity : definition.release_year_limits.max
 		};
 	}
+	let required_artists: Artist[] = [];
+	if ('required_artist_ids' in definition) {
+		required_artists = await getArtists(definition.required_artist_ids, make_request);
+	}
 	return {
 		playlist: playlist,
 		included_playlists: included_playlists,
@@ -175,6 +186,7 @@ const toSynchronizedPlaylist = async (
 		required_playlists: required_playlists,
 		duration_limits: duration_limits,
 		release_year_limits: release_year_limits,
+		required_artists: required_artists,
 		synchronizing: false
 	};
 };
@@ -213,7 +225,8 @@ const getAndFilterTracks = async (
 		excluded_tracks,
 		required_tracks,
 		synchronized_playlist.duration_limits,
-		synchronized_playlist.release_year_limits
+		synchronized_playlist.release_year_limits,
+		synchronized_playlist.required_artists
 	);
 };
 
@@ -222,7 +235,8 @@ export const filterTracks = (
 	excluded_tracks: Track[],
 	required_tracks: Track[],
 	duration_limits: { min: number; max: number },
-	release_year_limits: { min: number; max: number }
+	release_year_limits: { min: number; max: number },
+	required_artists: Artist[]
 ): Track[] => {
 	let tracks = removeDuplicates(included_tracks, (track) => track.uri);
 	tracks = tracks.filter((track) => {
@@ -234,6 +248,12 @@ export const filterTracks = (
 			track.album.release_year <= release_year_limits.max
 		);
 	});
+	let required_artists_set = new Set(required_artists.map((artist) => artist.id));
+	if (required_artists_set.size > 0) {
+		tracks = tracks.filter((track) => {
+			return track.artists.some((artist) => required_artists_set.has(artist.id));
+		});
+	}
 	tracks = difference(tracks, excluded_tracks, (track) => track.uri);
 	if (required_tracks.length > 0) {
 		tracks = intersection(tracks, required_tracks, (track) => track.uri);

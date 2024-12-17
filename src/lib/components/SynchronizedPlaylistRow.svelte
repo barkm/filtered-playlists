@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Playlist } from '$lib/spotify/api';
+	import type { Artist, Playlist } from '$lib/spotify/api';
 	import { authorizedRequest } from '$lib/spotify/authorization';
 	import { synchronize, type SynchronizedPlaylist } from '$lib/synchronized';
 	import RandomSquare from './RandomSquare.svelte';
@@ -39,8 +39,16 @@
 		return `release years: ${min} - ${max}`;
 	};
 
+	const get_required_artists_str = (required_artists: Artist[]) => {
+		if (required_artists.length === 0) {
+			return '';
+		}
+		return `artists: ${required_artists.map((artist) => artist.name).join(', ')}`;
+	};
+
 	const duration_limits = get_duration_limit_str(synchronized_playlist.duration_limits);
 	const release_year_limits = get_release_year_limit_str(synchronized_playlist.release_year_limits);
+	const required_artists = get_required_artists_str(synchronized_playlist.required_artists);
 
 	let show_details = $state(false);
 </script>
@@ -93,6 +101,11 @@
 			{#if release_year_limits !== ''}
 				<div>
 					{release_year_limits}
+				</div>
+			{/if}
+			{#if required_artists !== ''}
+				<div>
+					{required_artists}
 				</div>
 			{/if}
 		</playlistdetails>

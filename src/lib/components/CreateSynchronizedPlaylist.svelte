@@ -80,7 +80,8 @@
 				required_playlists,
 				is_public,
 				duration_limits,
-				release_year_limits
+				release_year_limits,
+				required_artists
 			);
 			synchronized_playlists = [synchronized_playlist, ...synchronized_playlists];
 			playlist_name = '';
