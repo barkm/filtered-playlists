@@ -5,7 +5,6 @@
 	import RangeSlider from 'svelte-range-slider-pips';
 	import { ms_to_min_sec, type Limits } from '$lib/duration';
 	import { logged_in_guard } from '$lib/login';
-	import DropDown from './DropDown.svelte';
 	import ArtistsDropDown from './ArtistsDropDown.svelte';
 
 	interface Props {
