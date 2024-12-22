@@ -58,12 +58,12 @@
 		);
 	};
 
-	let tracks = $derived.by(async () =>
+	let all_tracks = $derived.by(async () =>
 		get_tracks({ min: 0, max: Infinity }, { min: -Infinity, max: Infinity }, [])
 	);
 
-	let durations = $derived.by(async () => {
-		let tracks_resolved = await tracks;
+	let init_duration_limits = $derived.by(async () => {
+		let tracks_resolved = await all_tracks;
 		if (tracks_resolved.length === 0) {
 			return {
 				min: 0,
@@ -79,8 +79,8 @@
 		};
 	});
 
-	let release_years = $derived.by(async () => {
-		let tracks_resolved = await tracks;
+	let init_release_year_limits = $derived.by(async () => {
+		let tracks_resolved = await all_tracks;
 		if (tracks_resolved.length === 0) {
 			return {
 				min: 0,
@@ -96,8 +96,8 @@
 		};
 	});
 
-	let artists = $derived.by(async () => {
-		let tracks_resolved = await tracks;
+	let all_artists = $derived.by(async () => {
+		let tracks_resolved = await all_tracks;
 		if (tracks_resolved.length === 0) {
 			return [];
 		}
@@ -124,12 +124,12 @@
 
 <container>
 	{#if included_playlists.length !== 0}
-		{#await Promise.all([artists, durations, release_years])}
+		{#await Promise.all([all_artists, init_duration_limits, init_release_year_limits])}
 			<p>Loading...</p>
-		{:then [artists, durations, release_years]}
+		{:then [all_artists, init_duration_limits, init_release_year_limits]}
 			<artists>
 				<ArtistsDropDown
-					{artists}
+					artists={all_artists}
 					bind:selected_artists={required_artists}
 					on_change={() => {
 						get_tracks(duration_limits, release_year_limits, required_artists).then((t) => {
@@ -146,23 +146,23 @@
 					range
 					hoverable={false}
 					formatter={(ms) => {
-						if (ms === durations.min) {
+						if (ms === init_duration_limits.min) {
 							return '00:00';
 						}
-						if (ms === durations.max) {
+						if (ms === init_duration_limits.max) {
 							return '+inf&nbsp;';
 						}
 						return ms_to_min_sec(ms);
 					}}
-					min={durations.min}
-					max={durations.max}
-					values={[durations.min, durations.max]}
+					min={init_duration_limits.min}
+					max={init_duration_limits.max}
+					values={[init_duration_limits.min, init_duration_limits.max]}
 					springValues={{ stiffness: 1, damping: 1 }}
 					on:change={(e) => {
 						const new_values = e.detail.values;
 						duration_limits = {
-							min: new_values[0] === durations.min ? 0 : new_values[0],
-							max: new_values[1] === durations.max ? Infinity : new_values[1]
+							min: new_values[0] === init_duration_limits.min ? 0 : new_values[0],
+							max: new_values[1] === init_duration_limits.max ? Infinity : new_values[1]
 						};
 						get_tracks(duration_limits, release_year_limits, required_artists).then((t) => {
 							filtered_tracks = t;
@@ -178,23 +178,23 @@
 					range
 					hoverable={false}
 					formatter={(year) => {
-						if (year === release_years.min) {
+						if (year === init_release_year_limits.min) {
 							return '-inf';
 						}
-						if (year === release_years.max) {
+						if (year === init_release_year_limits.max) {
 							return '+inf';
 						}
 						return year.toString();
 					}}
-					min={release_years.min}
-					max={release_years.max}
+					min={init_release_year_limits.min}
+					max={init_release_year_limits.max}
 					values={[release_year_limits.min, release_year_limits.max]}
 					springValues={{ stiffness: 1, damping: 1 }}
 					on:change={(e) => {
 						const new_values = e.detail.values;
 						release_year_limits = {
-							min: new_values[0] === release_years.min ? -Infinity : new_values[0],
-							max: new_values[1] === release_years.max ? Infinity : new_values[1]
+							min: new_values[0] === init_release_year_limits.min ? -Infinity : new_values[0],
+							max: new_values[1] === init_release_year_limits.max ? Infinity : new_values[1]
 						};
 						get_tracks(duration_limits, release_year_limits, required_artists).then((t) => {
 							filtered_tracks = t;
