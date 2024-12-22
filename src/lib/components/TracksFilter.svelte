@@ -71,8 +71,8 @@
 			};
 		}
 		let durations = tracks_resolved.map((t) => t.duration_ms);
-		let min_duration = Math.round(Math.min(...durations));
-		let max_duration = Math.round(Math.max(...durations));
+		let min_duration = Math.round(Math.min(...durations)) - 1;
+		let max_duration = Math.round(Math.max(...durations)) + 1;
 		return {
 			min: min_duration,
 			max: max_duration
@@ -88,8 +88,8 @@
 			};
 		}
 		let release_years = tracks_resolved.map((t) => t.album.release_year);
-		let min_release_year = Math.min(...release_years);
-		let max_release_year = Math.max(...release_years);
+		let min_release_year = Math.min(...release_years) - 1;
+		let max_release_year = Math.max(...release_years) + 1;
 		return {
 			min: min_release_year,
 			max: max_release_year
