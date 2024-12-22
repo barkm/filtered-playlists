@@ -116,8 +116,6 @@
 	let filtered_tracks = $derived.by(async () =>
 		get_tracks(duration_limits, release_year_limits, required_artists)
 	);
-
-	$inspect(filtered_tracks);
 </script>
 
 <container>
