@@ -113,29 +113,23 @@
 		return unique_artists.sort((a, b) => a.name.localeCompare(b.name));
 	});
 
-	let filtered_tracks: Track[] | undefined = $state(undefined);
+	let filtered_tracks = $derived.by(async () =>
+		get_tracks(duration_limits, release_year_limits, required_artists)
+	);
 
-	$effect(() => {
-		get_tracks({ min: 0, max: Infinity }, { min: -Infinity, max: Infinity }, []).then((t) => {
-			filtered_tracks = t;
-		});
-	});
+	$inspect(filtered_tracks);
 </script>
 
 <container>
 	{#if included_playlists.length !== 0}
 		{#await Promise.all([all_artists, init_duration_limits, init_release_year_limits])}
-			<p>Loading...</p>
+			<p>loading...</p>
 		{:then [all_artists, init_duration_limits, init_release_year_limits]}
 			<artists>
 				<ArtistsDropDown
 					artists={all_artists}
 					bind:selected_artists={required_artists}
-					on_change={() => {
-						get_tracks(duration_limits, release_year_limits, required_artists).then((t) => {
-							filtered_tracks = t;
-						});
-					}}
+					on_change={() => {}}
 				/>
 			</artists>
 			duration
@@ -156,7 +150,7 @@
 					}}
 					min={init_duration_limits.min}
 					max={init_duration_limits.max}
-					values={[init_duration_limits.min, init_duration_limits.max]}
+					values={[duration_limits.min, duration_limits.max]}
 					springValues={{ stiffness: 1, damping: 1 }}
 					on:change={(e) => {
 						const new_values = e.detail.values;
@@ -164,9 +158,6 @@
 							min: new_values[0] === init_duration_limits.min ? 0 : new_values[0],
 							max: new_values[1] === init_duration_limits.max ? Infinity : new_values[1]
 						};
-						get_tracks(duration_limits, release_year_limits, required_artists).then((t) => {
-							filtered_tracks = t;
-						});
 					}}
 				/>
 			</range-slider>
@@ -196,12 +187,13 @@
 							min: new_values[0] === init_release_year_limits.min ? -Infinity : new_values[0],
 							max: new_values[1] === init_release_year_limits.max ? Infinity : new_values[1]
 						};
-						get_tracks(duration_limits, release_year_limits, required_artists).then((t) => {
-							filtered_tracks = t;
-						});
 					}}
 				/>
 			</range-slider>
+		{/await}
+		{#await filtered_tracks}
+			<p>loading...</p>
+		{:then filtered_tracks}
 			<filtered-tracks>
 				{#if filtered_tracks !== undefined}
 					{#if filtered_tracks.length === 0}
