@@ -6,16 +6,9 @@
 		options: T[];
 		selected: T[];
 		option_snippet: (option: T) => any;
-		on_change?: () => void;
 	}
 
-	let {
-		placeholder,
-		options,
-		selected = $bindable(),
-		option_snippet,
-		on_change = () => {}
-	}: Props = $props();
+	let { placeholder, options, selected = $bindable(), option_snippet }: Props = $props();
 
 	const to_options = (ts: T[]) => {
 		return ts.map((t) => ({
@@ -40,7 +33,6 @@
 	let:option
 	on:change={() => {
 		selected = multiselect_selected.map((s) => s.value);
-		on_change();
 	}}
 	on:removeAll={() => {
 		selected = [];

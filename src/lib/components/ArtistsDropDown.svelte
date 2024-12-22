@@ -7,10 +7,9 @@
 	interface Props {
 		artists: Artist[];
 		selected_artists: Artist[];
-		on_change: () => void;
 	}
 
-	let { artists, selected_artists = $bindable(), on_change }: Props = $props();
+	let { artists, selected_artists = $bindable() }: Props = $props();
 	let request_cacher = new RequestCacher(authorizedRequest);
 
 	const artists_with_cover = $derived.by(async () => {
@@ -22,12 +21,7 @@
 {#await artists_with_cover}
 	<p>loading...</p>
 {:then artists_with_cover}
-	<DropDown
-		placeholder="artists"
-		options={artists_with_cover}
-		bind:selected={selected_artists}
-		{on_change}
-	>
+	<DropDown placeholder="artists" options={artists_with_cover} bind:selected={selected_artists}>
 		{#snippet option_snippet(artist: Artist)}
 			<artist-option>
 				<img src={artist.cover_url} alt="cover" width="20px" />

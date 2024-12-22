@@ -126,11 +126,7 @@
 			<p>loading...</p>
 		{:then [all_artists, init_duration_limits, init_release_year_limits]}
 			<artists>
-				<ArtistsDropDown
-					artists={all_artists}
-					bind:selected_artists={required_artists}
-					on_change={() => {}}
-				/>
+				<ArtistsDropDown artists={all_artists} bind:selected_artists={required_artists} />
 			</artists>
 			duration
 			<range-slider>
