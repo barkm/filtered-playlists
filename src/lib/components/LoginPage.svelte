@@ -53,26 +53,37 @@
 		{#if is_logged_in}
 			<Main logout={logoutAndReset} />
 		{:else}
-			<login>
-				<p>allow access to</p>
-				<PermissionsSelector {label} bind:selections={permissions}></PermissionsSelector>
-				<login-button>
-					<button onclick={() => login(scopes)} disabled={!login_enabled}>
-						<login-text> log in </login-text>
-					</button>
-				</login-button>
-			</login>
+			<content>
+				<login>
+					<p>allow access to</p>
+					<PermissionsSelector {label} bind:selections={permissions}></PermissionsSelector>
+					<login-button>
+						<button onclick={() => login(scopes)} disabled={!login_enabled}>
+							<login-text> log in </login-text>
+						</button>
+					</login-button>
+				</login>
+				<footer>this website stores data in your browser to keep you logged in</footer>
+			</content>
 		{/if}
 	{/await}
 </page>
 
 <style>
-	login {
+	content {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		height: 100vh;
+	}
+
+	login {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+		align-items: center;
+		justify-content: center;
 	}
 
 	login-button {
@@ -82,5 +93,12 @@
 	login-text {
 		font-size: 1em;
 		margin: 5em;
+	}
+
+	footer {
+		margin-bottom: 1em;
+		font-size: 0.8em;
+		max-width: 60%;
+		text-align: center;
 	}
 </style>
