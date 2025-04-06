@@ -116,6 +116,28 @@ const handleCreatePlaylistResponse = async (response: Response): Promise<Playlis
 	return parsePlaylistFromItem(body);
 };
 
+export const changePlaylistDetails = async (
+	playlist_id: string,
+	is_public: boolean,
+	make_request: MakeRequest = authorizedRequest
+): Promise<void> => {
+	await make_request(
+		`https://api.spotify.com/v1/playlists/${playlist_id}`,
+		'PUT',
+		handleChangePlaylistDetailsResponse,
+		'application/json',
+		JSON.stringify({
+			public: is_public
+		})
+	);
+};
+
+const handleChangePlaylistDetailsResponse = async (response: Response): Promise<void> => {
+	if (response.status != 200) {
+		throw new Error('Failed to change playlist details');
+	}
+};
+
 export const unfollowPlaylist = async (
 	playlist_id: string,
 	make_request: MakeRequest = authorizedRequest

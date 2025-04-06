@@ -3,6 +3,7 @@ import { readJpegComment, writeJpegComment, removeDataUrlPrefix } from './jpeg/c
 import { fetchImageData } from './jpeg/download';
 import {
 	addPlaylistCoverImage,
+	changePlaylistDetails,
 	createPlaylist,
 	getArtists,
 	getPlaylist,
@@ -46,6 +47,7 @@ export const createSynchronizedPlaylist = async (
 		included_playlists,
 		excluded_playlists,
 		required_playlists,
+		is_public,
 		duration_limits,
 		release_year_limits,
 		required_artists
@@ -68,6 +70,7 @@ export const updateSynchronizedPlaylist = async (
 		synchronized_playlist.included_playlists,
 		synchronized_playlist.excluded_playlists,
 		synchronized_playlist.required_playlists,
+		synchronized_playlist.playlist.is_public,
 		synchronized_playlist.duration_limits,
 		synchronized_playlist.release_year_limits,
 		synchronized_playlist.required_artists
@@ -81,10 +84,12 @@ const updateDefinition = async (
 	included_playlists: Playlist[],
 	excluded_playlists: Playlist[],
 	required_playlists: Playlist[],
+	is_public: boolean,
 	duration_limits: Limits,
 	release_year_limits: Limits,
 	required_artists: Artist[]
 ): Promise<SynchronizedPlaylist> => {
+	changePlaylistDetails(playlist.id, is_public, make_request);
 	const synchronized_playlist: SynchronizedPlaylist = {
 		playlist: playlist,
 		included_playlists: included_playlists,
