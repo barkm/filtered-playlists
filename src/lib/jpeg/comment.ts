@@ -5,7 +5,7 @@ const COMMENT_MARKER = Buffer.from([0xff, 0xfe]);
 
 export const writeJpegComment = (dataUrl: string, comment: string): string => {
 	const buffer = dataUrlToBuffer(dataUrl);
-	const buffer_with_comment = writeComment(buffer, comment);
+	const buffer_with_comment = overwriteComment(buffer, comment);
 	return bufferToDataUrl(buffer_with_comment);
 };
 
@@ -33,12 +33,24 @@ const dataUrlToUint8Array = (dataUrl: string): Uint8Array => {
 	return binaryArray;
 };
 
-const writeComment = (buffer: Buffer, comment: string): Buffer => {
+const overwriteComment = (buffer: Buffer, comment: string): Buffer => {
 	const comment_length = encodeCommentLength(comment.length);
 	const comment_data = Buffer.from(comment);
 	const start_buffer = buffer.subarray(0, START_MARKER.length);
-	const data_buffer = buffer.subarray(START_MARKER.length);
+	const data_buffer = getDataBuffer(buffer);
 	return Buffer.concat([start_buffer, COMMENT_MARKER, comment_length, comment_data, data_buffer]);
+};
+
+const getDataBuffer = (buffer: Buffer): Buffer => {
+	try {
+		const comment_offset = getCommentOffset(buffer);
+		const comment_length = buffer.readUInt16BE(comment_offset + COMMENT_MARKER.length);
+		const comment_length_offset = comment_offset + COMMENT_MARKER.length + 2;
+		const commend_end_offset = comment_length_offset + comment_length - 2;
+		return buffer.subarray(commend_end_offset);
+	} catch (e) {
+		return buffer.subarray(START_MARKER.length);
+	}
 };
 
 const encodeCommentLength = (length: number): Buffer => {
