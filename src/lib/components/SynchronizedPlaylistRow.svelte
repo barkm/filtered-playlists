@@ -93,18 +93,25 @@
 					bind:release_year_limits={synchronized_playlist.release_year_limits}
 					bind:required_artists={synchronized_playlist.required_artists}
 				/>
-				<button
-					class="click"
-					disabled={synchronized_playlist.synchronizing}
-					onclick={logged_in_guard(() =>
-						updateSynchronizedPlaylist(authorizedRequest, synchronized_playlist)
-							.then((s) => {
-								synchronized_playlist = s;
-								editing = false;
-							})
-							.catch((e) => console.error(e))
-					)}>done</button
-				>
+				<buttons>
+					<button
+						class="click"
+						disabled={synchronized_playlist.synchronizing}
+						onclick={logged_in_guard(() =>
+							updateSynchronizedPlaylist(authorizedRequest, synchronized_playlist)
+								.then((s) => {
+									synchronized_playlist = s;
+									editing = false;
+								})
+								.catch((e) => console.error(e))
+						)}>done</button
+					>
+					<button
+						class="click"
+						disabled={synchronized_playlist.synchronizing}
+						onclick={() => (editing = false)}>cancel</button
+					>
+				</buttons>
 			{:else}
 				{#if included_playlist_names !== ''}
 					<div>
