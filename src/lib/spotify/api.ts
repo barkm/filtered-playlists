@@ -28,6 +28,7 @@ export interface Playlist {
 	description: string;
 	cover?: CoverImage;
 	spotify_url: string;
+	is_public: boolean;
 }
 
 export const getPlaylist = async (
@@ -83,7 +84,8 @@ const parsePlaylistFromItem = (item: any): Playlist => ({
 	name: item.name,
 	description: item.description,
 	cover: item.images?.length > 0 ? item.images[item.images.length - 1] : null,
-	spotify_url: item.external_urls.spotify
+	spotify_url: item.external_urls.spotify,
+	is_public: item.public
 });
 
 export const createPlaylist = async (
