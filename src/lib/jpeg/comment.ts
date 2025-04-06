@@ -62,8 +62,11 @@ const getCommentOffset = (buffer: Buffer): number => {
 };
 
 const readJpegCommentFromOffset = (buffer: Buffer, offset: number): string => {
-	const comment_length = buffer.readUInt16BE(offset + 2);
-	return buffer.subarray(offset + 4, offset + 4 + comment_length - 2).toString('utf-8');
+	const comment_length = buffer.readUInt16BE(offset + COMMENT_MARKER.length);
+	const comment_length_offset = offset + COMMENT_MARKER.length + 2;
+	const commend_end_offset = comment_length_offset + comment_length - 2;
+	const comment_buffer = buffer.subarray(comment_length_offset, commend_end_offset);
+	return comment_buffer.toString('utf-8');
 };
 
 const bufferToDataUrl = (buffer: Buffer): string => {
