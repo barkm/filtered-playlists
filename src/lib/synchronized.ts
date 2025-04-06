@@ -52,6 +52,28 @@ export const createSynchronizedPlaylist = async (
 	);
 };
 
+export const updateSynchronizedPlaylist = async (
+	make_request: MakeRequest,
+	synchronized_playlist: SynchronizedPlaylist
+): Promise<SynchronizedPlaylist> => {
+	const cover_url = synchronized_playlist.playlist.cover?.url;
+	if (!cover_url) {
+		throw new Error('Playlist has no cover');
+	}
+	const cover_data = await fetchImageData(cover_url);
+	return updateDefinition(
+		make_request,
+		cover_data,
+		synchronized_playlist.playlist,
+		synchronized_playlist.included_playlists,
+		synchronized_playlist.excluded_playlists,
+		synchronized_playlist.required_playlists,
+		synchronized_playlist.duration_limits,
+		synchronized_playlist.release_year_limits,
+		synchronized_playlist.required_artists
+	);
+};
+
 const updateDefinition = async (
 	make_request: MakeRequest,
 	cover_data: string,

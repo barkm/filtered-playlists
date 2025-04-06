@@ -1,25 +1,37 @@
 <script lang="ts">
 	import type { Artist, Playlist } from '$lib/spotify/api';
 	import { authorizedRequest } from '$lib/spotify/authorization';
-	import { synchronize, type SynchronizedPlaylist } from '$lib/synchronized';
+	import {
+		synchronize,
+		updateSynchronizedPlaylist,
+		type SynchronizedPlaylist
+	} from '$lib/synchronized';
 	import RandomSquare from './RandomSquare.svelte';
 
 	interface Props {
+		playlists: Playlist[];
 		synchronized_playlist: SynchronizedPlaylist;
 		onRemove: () => void;
 	}
 	import { ms_to_min_sec, type Limits } from '$lib/duration';
 	import { logged_in_guard } from '$lib/login';
+	import CreationOptions from './CreationOptions.svelte';
 
-	let { synchronized_playlist, onRemove }: Props = $props();
+	let { playlists, synchronized_playlist = $bindable(), onRemove }: Props = $props();
 
 	const concat_playlist_names = (playlists: Playlist[]) => {
 		return playlists.map((playlist) => playlist.name).join(', ');
 	};
 
-	const included_playlist_names = concat_playlist_names(synchronized_playlist.included_playlists);
-	const excluded_playlist_names = concat_playlist_names(synchronized_playlist.excluded_playlists);
-	const required_playlist_names = concat_playlist_names(synchronized_playlist.required_playlists);
+	const included_playlist_names = $derived(
+		concat_playlist_names(synchronized_playlist.included_playlists)
+	);
+	const excluded_playlist_names = $derived(
+		concat_playlist_names(synchronized_playlist.excluded_playlists)
+	);
+	const required_playlist_names = $derived(
+		concat_playlist_names(synchronized_playlist.required_playlists)
+	);
 
 	const get_duration_limit_str = (duration_limits: Limits) => {
 		if (duration_limits.min === 0 && duration_limits.max === Infinity) {
@@ -51,6 +63,7 @@
 	const required_artists = get_required_artists_str(synchronized_playlist.required_artists);
 
 	let show_details = $state(false);
+	let editing = $state(false);
 </script>
 
 <container>
@@ -69,48 +82,80 @@
 
 	{#if show_details}
 		<playlistdetails>
-			{#if included_playlist_names !== ''}
-				<div>
-					included: {included_playlist_names}
-				</div>
-			{/if}
-			{#if excluded_playlist_names !== ''}
-				<div>
-					excluded: {excluded_playlist_names}
-				</div>
-			{/if}
-			{#if required_playlist_names !== ''}
-				<div>
-					required: {required_playlist_names}
-				</div>
-			{/if}
-			{#if duration_limits !== ''}
-				<div>
-					{duration_limits}
-				</div>
-			{/if}
-			{#if release_year_limits !== ''}
-				<div>
-					{release_year_limits}
-				</div>
-			{/if}
-			{#if required_artists !== ''}
-				<div>
-					{required_artists}
-				</div>
-			{/if}
-
-			<buttons>
+			{#if editing}
+				<CreationOptions
+					{playlists}
+					bind:included_playlists={synchronized_playlist.included_playlists}
+					bind:excluded_playlists={synchronized_playlist.excluded_playlists}
+					bind:required_playlists={synchronized_playlist.required_playlists}
+					bind:is_public={synchronized_playlist.playlist.is_public}
+					bind:duration_limits={synchronized_playlist.duration_limits}
+					bind:release_year_limits={synchronized_playlist.release_year_limits}
+					bind:required_artists={synchronized_playlist.required_artists}
+				/>
 				<button
 					class="click"
 					disabled={synchronized_playlist.synchronizing}
-					onclick={logged_in_guard(() => synchronize(synchronized_playlist, authorizedRequest))}
-					>synchronize</button
+					onclick={logged_in_guard(() =>
+						updateSynchronizedPlaylist(authorizedRequest, synchronized_playlist)
+							.then((s) => {
+								synchronized_playlist = s;
+								editing = false;
+							})
+							.catch((e) => console.error(e))
+					)}>done</button
 				>
-				<button class="click" disabled={synchronized_playlist.synchronizing} onclick={onRemove}
-					>delete</button
-				>
-			</buttons>
+			{:else}
+				{#if included_playlist_names !== ''}
+					<div>
+						included: {included_playlist_names}
+					</div>
+				{/if}
+				{#if excluded_playlist_names !== ''}
+					<div>
+						excluded: {excluded_playlist_names}
+					</div>
+				{/if}
+				{#if required_playlist_names !== ''}
+					<div>
+						required: {required_playlist_names}
+					</div>
+				{/if}
+				{#if duration_limits !== ''}
+					<div>
+						{duration_limits}
+					</div>
+				{/if}
+				{#if release_year_limits !== ''}
+					<div>
+						{release_year_limits}
+					</div>
+				{/if}
+				{#if required_artists !== ''}
+					<div>
+						{required_artists}
+					</div>
+				{/if}
+
+				<buttons>
+					<button
+						class="click"
+						disabled={synchronized_playlist.synchronizing}
+						onclick={logged_in_guard(() => synchronize(synchronized_playlist, authorizedRequest))}
+						>synchronize</button
+					>
+					<button
+						class="click"
+						disabled={synchronized_playlist.synchronizing}
+						onclick={() => {
+							editing = true;
+						}}>edit</button
+					>
+					<button class="click" disabled={synchronized_playlist.synchronizing} onclick={onRemove}
+						>delete</button
+					>
+				</buttons>
+			{/if}
 		</playlistdetails>
 	{/if}
 </container>
