@@ -40,6 +40,30 @@ export const createSynchronizedPlaylist = async (
 	required_artists: Artist[]
 ): Promise<SynchronizedPlaylist> => {
 	const playlist = await createPlaylist(name, is_public, '');
+	return updateDefinition(
+		make_request,
+		cover_data,
+		playlist,
+		included_playlists,
+		excluded_playlists,
+		required_playlists,
+		duration_limits,
+		release_year_limits,
+		required_artists
+	);
+};
+
+const updateDefinition = async (
+	make_request: MakeRequest,
+	cover_data: string,
+	playlist: Playlist,
+	included_playlists: Playlist[],
+	excluded_playlists: Playlist[],
+	required_playlists: Playlist[],
+	duration_limits: Limits,
+	release_year_limits: Limits,
+	required_artists: Artist[]
+): Promise<SynchronizedPlaylist> => {
 	const synchronized_playlist: SynchronizedPlaylist = {
 		playlist: playlist,
 		included_playlists: included_playlists,
