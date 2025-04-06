@@ -3,7 +3,6 @@ import { readJpegComment, writeJpegComment, removeDataUrlPrefix } from './jpeg/c
 import { fetchImageData } from './jpeg/download';
 import {
 	addPlaylistCoverImage,
-	addTracks,
 	createPlaylist,
 	getArtists,
 	getPlaylist,
@@ -94,7 +93,7 @@ const updateDefinition = async (
 		}
 	}
 	const tracks = await getAndFilterTracks(make_request, synchronized_playlist);
-	addTracks(
+	replaceTracks(
 		playlist.id,
 		tracks.map((track) => track.uri)
 	);
