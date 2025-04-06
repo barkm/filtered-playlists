@@ -2,12 +2,10 @@
 	import { type Playlist } from '$lib/spotify/api';
 	import { createSynchronizedPlaylist, type SynchronizedPlaylist } from '$lib/synchronized';
 	import { onMount } from 'svelte';
-	import PlaylistDropdown from './PlaylistDropdown.svelte';
-	import PlaylistPrivacy from './PlaylistPrivacy.svelte';
 	import RandomSquare from './RandomSquare.svelte';
 	import { authorizedRequest, getScopes } from '$lib/spotify/authorization';
-	import TracksFilter from './TracksFilter.svelte';
 	import { logged_in_guard } from '$lib/login';
+	import CreationOptions from './CreationOptions.svelte';
 
 	interface Props {
 		playlists: Playlist[];
@@ -20,8 +18,6 @@
 
 	let scopes = getScopes();
 	let is_public = $state(!scopes.includes('playlist-modify-private'));
-	let enable_privacy_selection =
-		scopes.includes('playlist-modify-private') && scopes.includes('playlist-modify-public');
 	let included_playlists: Playlist[] = $state([]);
 	let excluded_playlists: Playlist[] = $state([]);
 	let required_playlists: Playlist[] = $state([]);
@@ -94,31 +90,12 @@
 </inputrow>
 
 {#if playlist_name !== ''}
-	<filters>
-		{#if enable_privacy_selection}
-			<PlaylistPrivacy bind:is_public />
-		{/if}
-		<PlaylistDropdown
-			placeholder="include"
-			{playlists}
-			bind:selected_playlists={included_playlists}
-		/>
-		<PlaylistDropdown
-			placeholder="exclude"
-			{playlists}
-			bind:selected_playlists={excluded_playlists}
-		/>
-		<PlaylistDropdown
-			placeholder="require"
-			{playlists}
-			bind:selected_playlists={required_playlists}
-		/>
-	</filters>
-
-	<TracksFilter
-		{included_playlists}
-		{excluded_playlists}
-		{required_playlists}
+	<CreationOptions
+		{playlists}
+		bind:included_playlists
+		bind:excluded_playlists
+		bind:required_playlists
+		bind:is_public
 		bind:duration_limits
 		bind:release_year_limits
 		bind:required_artists
@@ -155,10 +132,5 @@
 		margin-left: 1em;
 		align-self: center;
 		flex-basis: auto;
-	}
-
-	filters {
-		margin-top: 1em;
-		width: 100%;
 	}
 </style>
