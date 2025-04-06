@@ -65,15 +65,6 @@
 		<button class="playlistname" onclick={() => (show_details = !show_details)}>
 			{synchronized_playlist.playlist.name}
 		</button>
-		<button
-			class="click"
-			disabled={synchronized_playlist.synchronizing}
-			onclick={logged_in_guard(() => synchronize(synchronized_playlist, authorizedRequest))}
-			>sync</button
-		>
-		<button class="click" disabled={synchronized_playlist.synchronizing} onclick={onRemove}
-			>x</button
-		>
 	</main>
 
 	{#if show_details}
@@ -108,6 +99,18 @@
 					{required_artists}
 				</div>
 			{/if}
+
+			<buttons>
+				<button
+					class="click"
+					disabled={synchronized_playlist.synchronizing}
+					onclick={logged_in_guard(() => synchronize(synchronized_playlist, authorizedRequest))}
+					>synchronize</button
+				>
+				<button class="click" disabled={synchronized_playlist.synchronizing} onclick={onRemove}
+					>delete</button
+				>
+			</buttons>
 		</playlistdetails>
 	{/if}
 </container>
@@ -175,5 +178,11 @@
 		padding: 0.5em;
 		max-width: 500px;
 		width: 100%;
+	}
+
+	buttons {
+		display: flex;
+		flex-direction: row;
+		margin-top: 1em;
 	}
 </style>
