@@ -66,8 +66,7 @@ const decodeCommentLength = (buffer: Buffer): number => {
 };
 
 const readComment = (buffer: Buffer): string => {
-	const comment_offset = getCommentOffset(buffer);
-	return readJpegCommentFromOffset(buffer, comment_offset);
+	return getCommentBuffer(buffer).toString('utf-8');
 };
 
 const getCommentOffset = (buffer: Buffer): number => {
@@ -81,12 +80,15 @@ const getCommentOffset = (buffer: Buffer): number => {
 	throw new Error('No comment marker found in buffer.');
 };
 
-const readJpegCommentFromOffset = (buffer: Buffer, offset: number): string => {
-	const comment_length = decodeCommentLength(buffer.subarray(offset + COMMENT_MARKER.length));
-	const comment_length_offset = offset + COMMENT_MARKER.length + COMMENT_LENGTH_BUFFER_LENGTH;
+const getCommentBuffer = (buffer: Buffer): Buffer => {
+	const comment_offset = getCommentOffset(buffer);
+	const comment_length = decodeCommentLength(
+		buffer.subarray(comment_offset + COMMENT_MARKER.length)
+	);
+	const comment_length_offset =
+		comment_offset + COMMENT_MARKER.length + COMMENT_LENGTH_BUFFER_LENGTH;
 	const commend_end_offset = comment_length_offset + comment_length;
-	const comment_buffer = buffer.subarray(comment_length_offset, commend_end_offset);
-	return comment_buffer.toString('utf-8');
+	return buffer.subarray(comment_length_offset, commend_end_offset);
 };
 
 const bufferToDataUrl = (buffer: Buffer): string => {
