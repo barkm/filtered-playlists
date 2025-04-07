@@ -54,19 +54,19 @@ const getDataBuffer = (buffer: Buffer): Buffer => {
 	}
 };
 
-const encodeCommentLength = (length: number): Buffer => {
-	return Buffer.from([(length + 2) >> 8, (length + 2) & 0xff]);
-};
-
-const decodeCommentLength = (buffer: Buffer): number => {
-	if (buffer.length < COMMENT_LENGTH_BUFFER_LENGTH) {
-		throw new Error('Invalid buffer length');
-	}
-	return buffer.readUInt16BE(0) - 2;
-};
-
 const readComment = (buffer: Buffer): string => {
 	return getCommentBuffer(buffer).toString('utf-8');
+};
+
+const getCommentBuffer = (buffer: Buffer): Buffer => {
+	const comment_offset = getCommentOffset(buffer);
+	const comment_length = decodeCommentLength(
+		buffer.subarray(comment_offset + COMMENT_MARKER.length)
+	);
+	const comment_length_offset =
+		comment_offset + COMMENT_MARKER.length + COMMENT_LENGTH_BUFFER_LENGTH;
+	const commend_end_offset = comment_length_offset + comment_length;
+	return buffer.subarray(comment_length_offset, commend_end_offset);
 };
 
 const getCommentOffset = (buffer: Buffer): number => {
@@ -80,15 +80,15 @@ const getCommentOffset = (buffer: Buffer): number => {
 	throw new Error('No comment marker found in buffer.');
 };
 
-const getCommentBuffer = (buffer: Buffer): Buffer => {
-	const comment_offset = getCommentOffset(buffer);
-	const comment_length = decodeCommentLength(
-		buffer.subarray(comment_offset + COMMENT_MARKER.length)
-	);
-	const comment_length_offset =
-		comment_offset + COMMENT_MARKER.length + COMMENT_LENGTH_BUFFER_LENGTH;
-	const commend_end_offset = comment_length_offset + comment_length;
-	return buffer.subarray(comment_length_offset, commend_end_offset);
+const encodeCommentLength = (length: number): Buffer => {
+	return Buffer.from([(length + 2) >> 8, (length + 2) & 0xff]);
+};
+
+const decodeCommentLength = (buffer: Buffer): number => {
+	if (buffer.length < COMMENT_LENGTH_BUFFER_LENGTH) {
+		throw new Error('Invalid buffer length');
+	}
+	return buffer.readUInt16BE(0) - 2;
 };
 
 const bufferToDataUrl = (buffer: Buffer): string => {
