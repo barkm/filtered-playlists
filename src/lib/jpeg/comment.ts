@@ -87,7 +87,7 @@ const decodeCommentLength = (buffer: Buffer): number => {
 	if (buffer.length < COMMENT_LENGTH_BUFFER_LENGTH) {
 		throw new Error('Invalid buffer length');
 	}
-	return buffer.readUInt16BE(0) - 2;
+	return buffer.readUInt16BE(0) - COMMENT_LENGTH_BUFFER_LENGTH;
 };
 
 const bufferToDataUrl = (buffer: Buffer): string => {
