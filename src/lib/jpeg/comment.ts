@@ -80,7 +80,10 @@ const getMarkerOffset = (buffer: Buffer, marker: Buffer): number => {
 };
 
 const encodeCommentLength = (length: number): Buffer => {
-	return Buffer.from([(length + 2) >> 8, (length + 2) & 0xff]);
+	return Buffer.from([
+		(length + COMMENT_LENGTH_BUFFER_LENGTH) >> 8,
+		(length + COMMENT_LENGTH_BUFFER_LENGTH) & 0xff
+	]);
 };
 
 const decodeCommentLength = (buffer: Buffer): number => {
