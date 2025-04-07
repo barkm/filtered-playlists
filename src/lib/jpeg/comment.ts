@@ -44,11 +44,8 @@ const overwriteComment = (buffer: Buffer, comment: string): Buffer => {
 
 const getDataBuffer = (buffer: Buffer): Buffer => {
 	try {
-		const comment_offset = getCommentOffset(buffer);
-		const comment_length = buffer.readUInt16BE(comment_offset + COMMENT_MARKER.length);
-		const comment_length_offset = comment_offset + COMMENT_MARKER.length + 2;
-		const commend_end_offset = comment_length_offset + comment_length - 2;
-		return buffer.subarray(commend_end_offset);
+		const { start, end } = getCommentBufferOffsets(buffer);
+		return buffer.subarray(end);
 	} catch (e) {
 		return buffer.subarray(START_MARKER.length);
 	}
