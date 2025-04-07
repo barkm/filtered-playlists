@@ -81,6 +81,9 @@ const getMarkerOffset = (buffer: Buffer, marker: Buffer): number => {
 };
 
 const encodeCommentLength = (length: number): Buffer => {
+	if (length > 0xffff - COMMENT_LENGTH_BUFFER_LENGTH) {
+		throw new Error('Comment length exceeds maximum allowed size');
+	}
 	return Buffer.from([
 		(length + COMMENT_LENGTH_BUFFER_LENGTH) >> 8,
 		(length + COMMENT_LENGTH_BUFFER_LENGTH) & 0xff
