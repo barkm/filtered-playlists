@@ -62,10 +62,8 @@ const getCommentBuffer = (buffer: Buffer): Buffer => {
 
 const getCommentBufferOffsets = (buffer: Buffer): { start: number; end: number } => {
 	const comment_offset = getCommentOffset(buffer);
-	const comment_length = decodeCommentLength(
-		buffer.subarray(comment_offset + COMMENT_MARKER.length)
-	);
-	const start = comment_offset + COMMENT_MARKER.length + COMMENT_LENGTH_BUFFER_LENGTH;
+	const comment_length = decodeCommentLength(buffer.subarray(comment_offset));
+	const start = comment_offset + COMMENT_LENGTH_BUFFER_LENGTH;
 	const end = start + comment_length;
 	return { start, end };
 };
@@ -73,8 +71,8 @@ const getCommentBufferOffsets = (buffer: Buffer): { start: number; end: number }
 const getCommentOffset = (buffer: Buffer): number => {
 	let offset = 0;
 	while (offset < buffer.length) {
-		if (buffer.subarray(offset, offset + 2).equals(COMMENT_MARKER)) {
-			return offset;
+		if (buffer.subarray(offset, offset + COMMENT_MARKER.length).equals(COMMENT_MARKER)) {
+			return offset + COMMENT_MARKER.length;
 		}
 		offset++;
 	}
