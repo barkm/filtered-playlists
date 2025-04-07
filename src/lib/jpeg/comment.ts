@@ -2,6 +2,7 @@ import { Buffer } from 'buffer';
 
 const START_MARKER = Buffer.from([0xff, 0xd8]);
 const COMMENT_MARKER = Buffer.from([0xff, 0xfe]);
+const COMMENT_LENGTH_BUFFER_LENGTH = 2;
 
 export const writeJpegComment = (dataUrl: string, comment: string): string => {
 	const buffer = dataUrlToBuffer(dataUrl);
@@ -57,6 +58,13 @@ const encodeCommentLength = (length: number): Buffer => {
 	return Buffer.from([(length + 2) >> 8, (length + 2) & 0xff]);
 };
 
+const decodeCommentLength = (buffer: Buffer): number => {
+	if (buffer.length < COMMENT_LENGTH_BUFFER_LENGTH) {
+		throw new Error('Invalid buffer length');
+	}
+	return buffer.readUInt16BE(0) - 2;
+};
+
 const readComment = (buffer: Buffer): string => {
 	const comment_offset = getCommentOffset(buffer);
 	return readJpegCommentFromOffset(buffer, comment_offset);
@@ -74,9 +82,9 @@ const getCommentOffset = (buffer: Buffer): number => {
 };
 
 const readJpegCommentFromOffset = (buffer: Buffer, offset: number): string => {
-	const comment_length = buffer.readUInt16BE(offset + COMMENT_MARKER.length);
-	const comment_length_offset = offset + COMMENT_MARKER.length + 2;
-	const commend_end_offset = comment_length_offset + comment_length - 2;
+	const comment_length = decodeCommentLength(buffer.subarray(offset + COMMENT_MARKER.length));
+	const comment_length_offset = offset + COMMENT_MARKER.length + COMMENT_LENGTH_BUFFER_LENGTH;
+	const commend_end_offset = comment_length_offset + comment_length;
 	const comment_buffer = buffer.subarray(comment_length_offset, commend_end_offset);
 	return comment_buffer.toString('utf-8');
 };
