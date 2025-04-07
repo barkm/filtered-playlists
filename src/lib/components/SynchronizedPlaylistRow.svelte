@@ -158,8 +158,14 @@
 							editing = true;
 						}}>edit</button
 					>
-					<button class="click" disabled={synchronized_playlist.synchronizing} onclick={onRemove}
-						>delete</button
+					<button
+						class="click"
+						disabled={synchronized_playlist.synchronizing}
+						onclick={() => {
+							if (confirm(`Remove playlist ${synchronized_playlist.playlist.name}?`)) {
+								onRemove();
+							}
+						}}>delete</button
 					>
 				</buttons>
 			{/if}
