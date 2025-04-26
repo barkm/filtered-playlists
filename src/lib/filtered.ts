@@ -16,7 +16,7 @@ import {
 } from './spotify/api';
 import type { MakeRequest } from './spotify/request';
 
-export interface SynchronizedPlaylist {
+export interface FilteredPlaylist {
 	playlist: Playlist;
 	included_playlists: Playlist[];
 	excluded_playlists: Playlist[];
@@ -27,7 +27,7 @@ export interface SynchronizedPlaylist {
 	synchronizing: boolean;
 }
 
-export const createSynchronizedPlaylist = async (
+export const createFilteredPlaylist = async (
 	make_request: MakeRequest,
 	cover_data: string,
 	name: string,
@@ -38,7 +38,7 @@ export const createSynchronizedPlaylist = async (
 	duration_limits: Limits,
 	release_year_limits: Limits,
 	required_artists: Artist[]
-): Promise<SynchronizedPlaylist> => {
+): Promise<FilteredPlaylist> => {
 	const playlist = await createPlaylist(name, is_public, '');
 	return updateDefinition(
 		make_request,
@@ -54,11 +54,11 @@ export const createSynchronizedPlaylist = async (
 	);
 };
 
-export const updateSynchronizedPlaylist = async (
+export const updateFilteredPlaylist = async (
 	make_request: MakeRequest,
-	synchronized_playlist: SynchronizedPlaylist
-): Promise<SynchronizedPlaylist> => {
-	const cover_url = synchronized_playlist.playlist.cover?.url;
+	filtered_playlist: FilteredPlaylist
+): Promise<FilteredPlaylist> => {
+	const cover_url = filtered_playlist.playlist.cover?.url;
 	if (!cover_url) {
 		throw new Error('Playlist has no cover');
 	}
@@ -66,14 +66,14 @@ export const updateSynchronizedPlaylist = async (
 	return updateDefinition(
 		make_request,
 		cover_data,
-		synchronized_playlist.playlist,
-		synchronized_playlist.included_playlists,
-		synchronized_playlist.excluded_playlists,
-		synchronized_playlist.required_playlists,
-		synchronized_playlist.playlist.is_public,
-		synchronized_playlist.duration_limits,
-		synchronized_playlist.release_year_limits,
-		synchronized_playlist.required_artists
+		filtered_playlist.playlist,
+		filtered_playlist.included_playlists,
+		filtered_playlist.excluded_playlists,
+		filtered_playlist.required_playlists,
+		filtered_playlist.playlist.is_public,
+		filtered_playlist.duration_limits,
+		filtered_playlist.release_year_limits,
+		filtered_playlist.required_artists
 	);
 };
 
@@ -88,9 +88,9 @@ const updateDefinition = async (
 	duration_limits: Limits,
 	release_year_limits: Limits,
 	required_artists: Artist[]
-): Promise<SynchronizedPlaylist> => {
+): Promise<FilteredPlaylist> => {
 	changePlaylistDetails(playlist.id, is_public, make_request);
-	const synchronized_playlist: SynchronizedPlaylist = {
+	const filtered_playlist: FilteredPlaylist = {
 		playlist: playlist,
 		included_playlists: included_playlists,
 		excluded_playlists: excluded_playlists,
@@ -119,7 +119,7 @@ const updateDefinition = async (
 			await new Promise((resolve) => setTimeout(resolve, 500));
 		}
 	}
-	const tracks = await getAndFilterTracks(make_request, synchronized_playlist);
+	const tracks = await getAndFilterTracks(make_request, filtered_playlist);
 	replaceTracks(
 		playlist.id,
 		tracks.map((track) => track.uri)
@@ -157,7 +157,7 @@ const updateDefinition = async (
 export const filterSychronizedPlaylists = async (
 	make_request: MakeRequest,
 	playlists: Playlist[]
-): Promise<SynchronizedPlaylist[]> => {
+): Promise<FilteredPlaylist[]> => {
 	const valid_playlists = await asyncFilter(playlists, isSynchronizedPlaylist);
 	return await Promise.all(valid_playlists.map((p) => toSynchronizedPlaylist(make_request, p)));
 };
@@ -191,7 +191,7 @@ const isSynchronizedPlaylist = async (playlist: Playlist): Promise<boolean> => {
 const toSynchronizedPlaylist = async (
 	make_request: MakeRequest,
 	playlist: Playlist
-): Promise<SynchronizedPlaylist> => {
+): Promise<FilteredPlaylist> => {
 	if (!playlist.cover) {
 		throw new Error('Playlist has no cover');
 	}
@@ -242,41 +242,41 @@ const toSynchronizedPlaylist = async (
 };
 
 export const synchronize = async (
-	synchronized_playlist: SynchronizedPlaylist,
+	filtered_playlist: FilteredPlaylist,
 	make_request: MakeRequest
 ): Promise<void> => {
-	synchronized_playlist.synchronizing = true;
-	const tracks = await getAndFilterTracks(make_request, synchronized_playlist);
+	filtered_playlist.synchronizing = true;
+	const tracks = await getAndFilterTracks(make_request, filtered_playlist);
 	replaceTracks(
-		synchronized_playlist.playlist.id,
+		filtered_playlist.playlist.id,
 		tracks.map((track) => track.uri)
 	);
-	synchronized_playlist.synchronizing = false;
+	filtered_playlist.synchronizing = false;
 };
 
 const getAndFilterTracks = async (
 	make_request: MakeRequest,
-	synchronized_playlist: SynchronizedPlaylist
+	filtered_playlist: FilteredPlaylist
 ): Promise<Track[]> => {
 	const included_tracks = await getTracksFromPlaylists(
 		make_request,
-		synchronized_playlist.included_playlists
+		filtered_playlist.included_playlists
 	);
 	const excluded_tracks = await getTracksFromPlaylists(
 		make_request,
-		synchronized_playlist.excluded_playlists
+		filtered_playlist.excluded_playlists
 	);
 	const required_tracks = await getTracksFromPlaylists(
 		make_request,
-		synchronized_playlist.required_playlists
+		filtered_playlist.required_playlists
 	);
 	return filterTracks(
 		included_tracks,
 		excluded_tracks,
 		required_tracks,
-		synchronized_playlist.duration_limits,
-		synchronized_playlist.release_year_limits,
-		synchronized_playlist.required_artists
+		filtered_playlist.duration_limits,
+		filtered_playlist.release_year_limits,
+		filtered_playlist.required_artists
 	);
 };
 

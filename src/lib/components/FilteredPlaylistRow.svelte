@@ -1,36 +1,32 @@
 <script lang="ts">
 	import type { Artist, Playlist } from '$lib/spotify/api';
 	import { authorizedRequest } from '$lib/spotify/authorization';
-	import {
-		synchronize,
-		updateSynchronizedPlaylist,
-		type SynchronizedPlaylist
-	} from '$lib/synchronized';
+	import { synchronize, updateFilteredPlaylist, type FilteredPlaylist } from '$lib/filtered';
 	import RandomSquare from './RandomSquare.svelte';
 
 	interface Props {
 		playlists: Playlist[];
-		synchronized_playlist: SynchronizedPlaylist;
+		filtered_playlist: FilteredPlaylist;
 		onRemove: () => void;
 	}
 	import { ms_to_min_sec, type Limits } from '$lib/duration';
 	import { logged_in_guard } from '$lib/login';
 	import CreationOptions from './CreationOptions.svelte';
 
-	let { playlists, synchronized_playlist = $bindable(), onRemove }: Props = $props();
+	let { playlists, filtered_playlist = $bindable(), onRemove }: Props = $props();
 
 	const concat_playlist_names = (playlists: Playlist[]) => {
 		return playlists.map((playlist) => playlist.name).join(', ');
 	};
 
 	const included_playlist_names = $derived(
-		concat_playlist_names(synchronized_playlist.included_playlists)
+		concat_playlist_names(filtered_playlist.included_playlists)
 	);
 	const excluded_playlist_names = $derived(
-		concat_playlist_names(synchronized_playlist.excluded_playlists)
+		concat_playlist_names(filtered_playlist.excluded_playlists)
 	);
 	const required_playlist_names = $derived(
-		concat_playlist_names(synchronized_playlist.required_playlists)
+		concat_playlist_names(filtered_playlist.required_playlists)
 	);
 
 	const get_duration_limit_str = (duration_limits: Limits) => {
@@ -58,9 +54,9 @@
 		return `artists: ${required_artists.map((artist) => artist.name).join(', ')}`;
 	};
 
-	const duration_limits = get_duration_limit_str(synchronized_playlist.duration_limits);
-	const release_year_limits = get_release_year_limit_str(synchronized_playlist.release_year_limits);
-	const required_artists = get_required_artists_str(synchronized_playlist.required_artists);
+	const duration_limits = get_duration_limit_str(filtered_playlist.duration_limits);
+	const release_year_limits = get_release_year_limit_str(filtered_playlist.release_year_limits);
+	const required_artists = get_required_artists_str(filtered_playlist.required_artists);
 
 	let show_details = $state(false);
 	let editing = $state(false);
@@ -68,15 +64,15 @@
 
 <container>
 	<main>
-		<a href={synchronized_playlist.playlist.spotify_url} target="_blank">
-			{#if synchronized_playlist.synchronizing}
+		<a href={filtered_playlist.playlist.spotify_url} target="_blank">
+			{#if filtered_playlist.synchronizing}
 				<RandomSquare update_ms={200} --height="100%" />
 			{:else}
-				<img src={synchronized_playlist.playlist.cover?.url} alt="cover" />
+				<img src={filtered_playlist.playlist.cover?.url} alt="cover" />
 			{/if}
 		</a>
 		<button class="playlistname" onclick={() => (show_details = !show_details)}>
-			{synchronized_playlist.playlist.name}
+			{filtered_playlist.playlist.name}
 		</button>
 	</main>
 
@@ -85,22 +81,22 @@
 			{#if editing}
 				<CreationOptions
 					{playlists}
-					bind:included_playlists={synchronized_playlist.included_playlists}
-					bind:excluded_playlists={synchronized_playlist.excluded_playlists}
-					bind:required_playlists={synchronized_playlist.required_playlists}
-					bind:is_public={synchronized_playlist.playlist.is_public}
-					bind:duration_limits={synchronized_playlist.duration_limits}
-					bind:release_year_limits={synchronized_playlist.release_year_limits}
-					bind:required_artists={synchronized_playlist.required_artists}
+					bind:included_playlists={filtered_playlist.included_playlists}
+					bind:excluded_playlists={filtered_playlist.excluded_playlists}
+					bind:required_playlists={filtered_playlist.required_playlists}
+					bind:is_public={filtered_playlist.playlist.is_public}
+					bind:duration_limits={filtered_playlist.duration_limits}
+					bind:release_year_limits={filtered_playlist.release_year_limits}
+					bind:required_artists={filtered_playlist.required_artists}
 				/>
 				<buttons>
 					<button
 						class="click"
-						disabled={synchronized_playlist.synchronizing}
+						disabled={filtered_playlist.synchronizing}
 						onclick={logged_in_guard(() =>
-							updateSynchronizedPlaylist(authorizedRequest, synchronized_playlist)
+							updateFilteredPlaylist(authorizedRequest, filtered_playlist)
 								.then((s) => {
-									synchronized_playlist = s;
+									filtered_playlist = s;
 									editing = false;
 								})
 								.catch((e) => console.error(e))
@@ -108,7 +104,7 @@
 					>
 					<button
 						class="click"
-						disabled={synchronized_playlist.synchronizing}
+						disabled={filtered_playlist.synchronizing}
 						onclick={() => (editing = false)}>cancel</button
 					>
 				</buttons>
@@ -147,22 +143,22 @@
 				<buttons>
 					<button
 						class="click"
-						disabled={synchronized_playlist.synchronizing}
-						onclick={logged_in_guard(() => synchronize(synchronized_playlist, authorizedRequest))}
+						disabled={filtered_playlist.synchronizing}
+						onclick={logged_in_guard(() => synchronize(filtered_playlist, authorizedRequest))}
 						>synchronize</button
 					>
 					<button
 						class="click"
-						disabled={synchronized_playlist.synchronizing}
+						disabled={filtered_playlist.synchronizing}
 						onclick={() => {
 							editing = true;
 						}}>edit</button
 					>
 					<button
 						class="click"
-						disabled={synchronized_playlist.synchronizing}
+						disabled={filtered_playlist.synchronizing}
 						onclick={() => {
-							if (confirm(`Remove playlist ${synchronized_playlist.playlist.name}?`)) {
+							if (confirm(`Remove playlist ${filtered_playlist.playlist.name}?`)) {
 								onRemove();
 							}
 						}}>delete</button

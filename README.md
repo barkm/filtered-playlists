@@ -1,1 +1,1 @@
-# synchronized-playlists
+# filtered-playlists

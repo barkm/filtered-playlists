@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { type Artist, type Playlist, type Track } from '$lib/spotify/api';
 	import { authorizedRequest } from '$lib/spotify/authorization';
-	import { filterTracks, getTracksFromPlaylists } from '$lib/synchronized';
+	import { filterTracks, getTracksFromPlaylists } from '$lib/filtered';
 	import RangeSlider from 'svelte-range-slider-pips';
 	import { ms_to_min_sec, type Limits } from '$lib/duration';
 	import { logged_in_guard } from '$lib/login';

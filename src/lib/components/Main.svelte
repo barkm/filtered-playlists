@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getUser, NoAccessError, type User } from '$lib/spotify/api';
 	import { onMount } from 'svelte';
-	import SynchronizedPlaylists from './SynchronizedPlaylists.svelte';
+	import FilteredPlaylists from './FilteredPlaylists.svelte';
 	import ErrorPage from './ErrorPage.svelte';
 
 	interface Props {
@@ -39,7 +39,7 @@
 				<button onclick={request_access}>request access</button>
 			</no-access-error>
 		{:else if user !== null}
-			<SynchronizedPlaylists />
+			<FilteredPlaylists />
 		{/if}
 	</div>
 	<div class="footer">

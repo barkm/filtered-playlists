@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type Playlist } from '$lib/spotify/api';
-	import { createSynchronizedPlaylist, type SynchronizedPlaylist } from '$lib/synchronized';
+	import { createFilteredPlaylist, type FilteredPlaylist } from '$lib/filtered';
 	import { onMount } from 'svelte';
 	import RandomSquare from './RandomSquare.svelte';
 	import { authorizedRequest, getScopes } from '$lib/spotify/authorization';
@@ -9,10 +9,10 @@
 
 	interface Props {
 		playlists: Playlist[];
-		synchronized_playlists: SynchronizedPlaylist[];
+		filtered_playlists: FilteredPlaylist[];
 	}
 
-	let { playlists, synchronized_playlists = $bindable() }: Props = $props();
+	let { playlists, filtered_playlists = $bindable() }: Props = $props();
 
 	let playlist_name = $state('');
 
@@ -67,7 +67,7 @@
 				return;
 			}
 			creating = true;
-			const synchronized_playlist = await createSynchronizedPlaylist(
+			const filtered_playlist = await createFilteredPlaylist(
 				authorizedRequest,
 				canvas.toDataURL('image/jpeg'),
 				playlist_name,
@@ -79,7 +79,7 @@
 				release_year_limits,
 				required_artists
 			);
-			synchronized_playlists = [synchronized_playlist, ...synchronized_playlists];
+			filtered_playlists = [filtered_playlist, ...filtered_playlists];
 			playlist_name = '';
 			included_playlists = [];
 			excluded_playlists = [];
