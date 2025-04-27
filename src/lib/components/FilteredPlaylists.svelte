@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { getPlaylists, type Playlist } from '$lib/spotify/api';
 	import { onMount } from 'svelte';
-	import SynchronizedPlaylists from './ListFilteredPlaylists.svelte';
-	import CreateSynchronizedPlaylist from './CreateSynchronizedPlaylist.svelte';
-	import { filterSychronizedPlaylists, synchronize, type FilteredPlaylist } from '$lib/filtered';
+	import FilteredPlaylists from './ListFilteredPlaylists.svelte';
+	import CreateFilteredPlaylist from './CreateFilteredPlaylist.svelte';
+	import {
+		filterFilteredPlaylists as filterFilteredPlaylists,
+		update,
+		type FilteredPlaylist
+	} from '$lib/filtered';
 	import Loading from './Loading.svelte';
 	import { RequestCacher } from '$lib/spotify/cache';
 	import { authorizedRequest } from '$lib/spotify/authorization';
@@ -12,22 +16,22 @@
 
 	let filtered_playlists: FilteredPlaylist[] | null = $state(null);
 	let playlists: Playlist[] | null = $state(null);
-	let disable_synchronization = $state(false);
+	let disable_update = $state(false);
 
 	onMount(
 		logged_in_guard(async () => {
 			playlists = await getPlaylists();
 			const request_cacher = new RequestCacher(authorizedRequest);
-			filtered_playlists = await filterSychronizedPlaylists(request_cacher.makeRequest, playlists);
+			filtered_playlists = await filterFilteredPlaylists(request_cacher.makeRequest, playlists);
 		})
 	);
 
-	const synchronize_all = logged_in_guard(async () => {
+	const update_all = logged_in_guard(async () => {
 		if (filtered_playlists !== null) {
-			disable_synchronization = true;
+			disable_update = true;
 			const request_cacher = new RequestCacher(authorizedRequest);
-			await Promise.all(filtered_playlists.map((p) => synchronize(p, request_cacher.makeRequest)));
-			disable_synchronization = false;
+			await Promise.all(filtered_playlists.map((p) => update(p, request_cacher.makeRequest)));
+			disable_update = false;
 		}
 	});
 </script>
@@ -38,8 +42,8 @@
 	<NoPlaylists />
 {:else}
 	{#if filtered_playlists.length !== 0}
-		<button onclick={synchronize_all} disabled={disable_synchronization}>synchronize all</button>
+		<button onclick={update_all} disabled={disable_update}>update all</button>
 	{/if}
-	<CreateSynchronizedPlaylist {playlists} bind:filtered_playlists />
-	<SynchronizedPlaylists {playlists} bind:filtered_playlists />
+	<CreateFilteredPlaylist {playlists} bind:filtered_playlists />
+	<FilteredPlaylists {playlists} bind:filtered_playlists />
 {/if}

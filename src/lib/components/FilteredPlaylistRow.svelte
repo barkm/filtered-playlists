@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Artist, Playlist } from '$lib/spotify/api';
 	import { authorizedRequest } from '$lib/spotify/authorization';
-	import { synchronize, updateFilteredPlaylist, type FilteredPlaylist } from '$lib/filtered';
+	import { update, updateFilteredPlaylist, type FilteredPlaylist } from '$lib/filtered';
 	import RandomSquare from './RandomSquare.svelte';
 
 	interface Props {
@@ -65,7 +65,7 @@
 <container>
 	<main>
 		<a href={filtered_playlist.playlist.spotify_url} target="_blank">
-			{#if filtered_playlist.synchronizing}
+			{#if filtered_playlist.updating}
 				<RandomSquare update_ms={200} --height="100%" />
 			{:else}
 				<img src={filtered_playlist.playlist.cover?.url} alt="cover" />
@@ -92,7 +92,7 @@
 				<buttons>
 					<button
 						class="click"
-						disabled={filtered_playlist.synchronizing}
+						disabled={filtered_playlist.updating}
 						onclick={logged_in_guard(() =>
 							updateFilteredPlaylist(authorizedRequest, filtered_playlist)
 								.then((s) => {
@@ -104,7 +104,7 @@
 					>
 					<button
 						class="click"
-						disabled={filtered_playlist.synchronizing}
+						disabled={filtered_playlist.updating}
 						onclick={() => (editing = false)}>cancel</button
 					>
 				</buttons>
@@ -143,20 +143,20 @@
 				<buttons>
 					<button
 						class="click"
-						disabled={filtered_playlist.synchronizing}
-						onclick={logged_in_guard(() => synchronize(filtered_playlist, authorizedRequest))}
-						>synchronize</button
+						disabled={filtered_playlist.updating}
+						onclick={logged_in_guard(() => update(filtered_playlist, authorizedRequest))}
+						>update</button
 					>
 					<button
 						class="click"
-						disabled={filtered_playlist.synchronizing}
+						disabled={filtered_playlist.updating}
 						onclick={() => {
 							editing = true;
 						}}>edit</button
 					>
 					<button
 						class="click"
-						disabled={filtered_playlist.synchronizing}
+						disabled={filtered_playlist.updating}
 						onclick={() => {
 							if (confirm(`Remove playlist ${filtered_playlist.playlist.name}?`)) {
 								onRemove();

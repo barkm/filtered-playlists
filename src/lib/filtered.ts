@@ -24,7 +24,7 @@ export interface FilteredPlaylist {
 	duration_limits: Limits;
 	release_year_limits: Limits;
 	required_artists: Artist[];
-	synchronizing: boolean;
+	updating: boolean;
 }
 
 export const createFilteredPlaylist = async (
@@ -98,7 +98,7 @@ const updateDefinition = async (
 		duration_limits: duration_limits,
 		release_year_limits: release_year_limits,
 		required_artists: required_artists,
-		synchronizing: false
+		updating: false
 	};
 	const definition = {
 		included_playlist_ids: included_playlists.map((playlist) => playlist.id),
@@ -150,16 +150,16 @@ const updateDefinition = async (
 		duration_limits: duration_limits,
 		release_year_limits: release_year_limits,
 		required_artists: required_artists,
-		synchronizing: false
+		updating: false
 	};
 };
 
-export const filterSychronizedPlaylists = async (
+export const filterFilteredPlaylists = async (
 	make_request: MakeRequest,
 	playlists: Playlist[]
 ): Promise<FilteredPlaylist[]> => {
-	const valid_playlists = await asyncFilter(playlists, isSynchronizedPlaylist);
-	return await Promise.all(valid_playlists.map((p) => toSynchronizedPlaylist(make_request, p)));
+	const valid_playlists = await asyncFilter(playlists, isFilteredPlaylist);
+	return await Promise.all(valid_playlists.map((p) => toFilteredPlaylist(make_request, p)));
 };
 
 const asyncFilter = async <T>(array: T[], filter: (x: T) => Promise<boolean>): Promise<T[]> => {
@@ -167,7 +167,7 @@ const asyncFilter = async <T>(array: T[], filter: (x: T) => Promise<boolean>): P
 	return array.filter((_, i) => filter_array[i]);
 };
 
-const isSynchronizedPlaylist = async (playlist: Playlist): Promise<boolean> => {
+const isFilteredPlaylist = async (playlist: Playlist): Promise<boolean> => {
 	try {
 		if (!playlist.cover || playlist.cover.width !== null || playlist.cover.height !== null) {
 			return false;
@@ -188,7 +188,7 @@ const isSynchronizedPlaylist = async (playlist: Playlist): Promise<boolean> => {
 	return true;
 };
 
-const toSynchronizedPlaylist = async (
+const toFilteredPlaylist = async (
 	make_request: MakeRequest,
 	playlist: Playlist
 ): Promise<FilteredPlaylist> => {
@@ -237,21 +237,21 @@ const toSynchronizedPlaylist = async (
 		duration_limits: duration_limits,
 		release_year_limits: release_year_limits,
 		required_artists: required_artists,
-		synchronizing: false
+		updating: false
 	};
 };
 
-export const synchronize = async (
+export const update = async (
 	filtered_playlist: FilteredPlaylist,
 	make_request: MakeRequest
 ): Promise<void> => {
-	filtered_playlist.synchronizing = true;
+	filtered_playlist.updating = true;
 	const tracks = await getAndFilterTracks(make_request, filtered_playlist);
 	replaceTracks(
 		filtered_playlist.playlist.id,
 		tracks.map((track) => track.uri)
 	);
-	filtered_playlist.synchronizing = false;
+	filtered_playlist.updating = false;
 };
 
 const getAndFilterTracks = async (
