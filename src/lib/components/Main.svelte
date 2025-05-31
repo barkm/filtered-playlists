@@ -31,34 +31,24 @@
 	};
 </script>
 
-<div class="container">
-	<div class="content">
-		{#if !has_access}
-			<no-access-error>
-				<ErrorPage error_message={"sorry! you don't have access to this page."} />
-				<button onclick={request_access}>request access</button>
-			</no-access-error>
-		{:else if user !== null}
-			<FilteredPlaylists />
-		{/if}
-	</div>
-	<div class="footer">
-		<button onclick={logout}>log out</button>
-		{#if user !== null}
-			<div>signed in as {user.display_name}</div>
-		{/if}
-	</div>
+<div class="content">
+	{#if !has_access}
+		<no-access-error>
+			<ErrorPage error_message={"sorry! you don't have access to this page."} />
+			<button onclick={request_access}>request access</button>
+		</no-access-error>
+	{:else if user !== null}
+		<FilteredPlaylists />
+	{/if}
+</div>
+<div class="footer">
+	<button onclick={logout}>log out</button>
+	{#if user !== null}
+		<div>signed in as {user.display_name}</div>
+	{/if}
 </div>
 
 <style>
-	.container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		min-height: 95vh;
-		padding: 2.5vh;
-	}
-
 	.content {
 		display: flex;
 		flex-direction: column;

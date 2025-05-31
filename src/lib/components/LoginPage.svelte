@@ -50,10 +50,10 @@
 
 <page>
 	{#await $is_logged_in then is_logged_in}
-		{#if is_logged_in}
-			<Main logout={logoutAndReset} />
-		{:else}
-			<content>
+		<content>
+			{#if is_logged_in}
+				<Main logout={logoutAndReset} />
+			{:else}
 				<login>
 					<p>allow access to</p>
 					<PermissionsSelector {label} bind:selections={permissions}></PermissionsSelector>
@@ -64,8 +64,8 @@
 					</login-button>
 				</login>
 				<footer>this website stores data in your browser to keep you logged in</footer>
-			</content>
-		{/if}
+			{/if}
+		</content>
 	{/await}
 </page>
 
@@ -75,7 +75,8 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		height: 100vh;
+		min-height: 95vh;
+		padding: 2.5vh;
 	}
 
 	login {
