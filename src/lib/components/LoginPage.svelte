@@ -65,6 +65,10 @@
 				</login>
 				<footer>this website stores data in your browser to keep you logged in</footer>
 			{/if}
+			<footer>
+				powered by
+				<img src="/spotify.svg" alt="Spotify logo" />
+			</footer>
 		</content>
 	{/await}
 </page>
@@ -97,9 +101,19 @@
 	}
 
 	footer {
+		margin-top: 1em;
 		margin-bottom: 1em;
 		font-size: 0.8em;
 		max-width: 60%;
 		text-align: center;
+		flex-direction: row;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	footer img {
+		margin-left: 0.5em;
+		height: 1.5em;
 	}
 </style>
